@@ -2,6 +2,8 @@ defmodule Astarte.VMQ.Plugin.AMQPClient do
   require Logger
   use GenServer
 
+  alias AMQP.Channel
+  alias AMQP.Connection
   alias Astarte.VMQ.Plugin.Config
 
   @connection_backoff 10000
@@ -30,10 +32,10 @@ defmodule Astarte.VMQ.Plugin.AMQPClient do
   end
 
   defp rabbitmq_connect(retry \\ true) do
-    with {:ok, conn} <- AMQP.Connection.open(Config.amqp_options()),
+    with {:ok, conn} <- Connection.open(Config.amqp_options()),
          # Get notifications when the connection goes down
          Process.monitor(conn.pid),
-         {:ok, chan} <- AMQP.Channel.open(conn) do
+         {:ok, chan} <- Channel.open(conn) do
 
       {:ok, chan}
 
