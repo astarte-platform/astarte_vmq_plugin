@@ -56,4 +56,24 @@ defmodule Astarte.VMQ.Plugin do
       end
     end
   end
+
+  def on_client_gone({_mountpoint, _client_id}) do
+    :ok
+  end
+
+  def on_client_offline({_mountpoint, _client_id}) do
+    :ok
+  end
+
+  def on_client_wakeup({_mountpoint, _client_id}) do
+    :ok
+  end
+
+  def on_register(_peer, {_mountpoint, _client_id}, _username) do
+    :ok
+  end
+
+  def on_publish(_username, {_mountpoint, _client_id}, _qos, _topic, _payload, _isretain) do
+    :ok
+  end
 end
