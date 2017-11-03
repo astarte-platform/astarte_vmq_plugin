@@ -12,8 +12,7 @@ defmodule Astarte.VMQ.Plugin.Application do
 
     # List all child processes to be supervised
     children = [
-      # Starts a worker by calling: Astarte.VMQ.Plugin.Worker.start_link(arg)
-      # {Astarte.VMQ.Plugin.Worker, arg},
+      Astarte.VMQ.Plugin.AMQPClient
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
