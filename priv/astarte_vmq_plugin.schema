@@ -37,3 +37,9 @@
 {mapping, "astarte_vmq_plugin.amqp.ssl_fail_if_no_peer_cert", "astarte_vmq_plugin.amqp_options.ssl_options.fail_if_no_peer_cert", [
     {datatype, {enum, [true, false]}}
   ]}.
+
+{mapping, "astarte_vmq_plugin.amqp.exchange_name", "astarte_vmq_plugin.exchange_name",
+  [
+    {default, "vmq_all"},
+    {datatype, string}
+  ]}.
