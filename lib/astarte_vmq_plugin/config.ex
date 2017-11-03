@@ -15,6 +15,12 @@ defmodule Astarte.VMQ.Plugin.Config do
       |> normalize_opts_strings()
 
     Application.put_env(:astarte_vmq_plugin, :amqp_options, amqp_opts)
+
+    exchange_name =
+      Application.get_env(:astarte_vmq_plugin, :exchange_name, "vmq_all")
+      |> to_string()
+
+    Application.put_env(:astarte_vmq_plugin, :exchange_name, exchange_name)
   end
 
   @doc """
@@ -22,6 +28,13 @@ defmodule Astarte.VMQ.Plugin.Config do
   """
   def amqp_options do
     Application.get_env(:astarte_vmq_plugin, :amqp_options, [])
+  end
+
+  @doc """
+  Returns the name of the exchange to use for the publish
+  """
+  def exchange_name do
+    Application.get_env(:astarte_vmq_plugin, :exchange_name)
   end
 
   defp normalize_opts_strings(amqp_options) do
