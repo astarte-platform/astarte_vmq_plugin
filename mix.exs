@@ -17,7 +17,15 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
   def application do
     [
       extra_applications: [:logger],
-      mod: {Astarte.VMQ.Plugin.Application, []}
+      mod: {Astarte.VMQ.Plugin.Application, []},
+      env: [
+        vmq_plugin_hooks:
+          [
+            {:auth_on_publish, Astarte.VMQ.Plugin, :auth_on_publish, 6, []},
+            {:auth_on_register, Astarte.VMQ.Plugin, :auth_on_register, 5, []},
+            {:auth_on_subscribe, Astarte.VMQ.Plugin, :auth_on_subscribe, 3, []}
+          ],
+      ]
     ]
   end
 
