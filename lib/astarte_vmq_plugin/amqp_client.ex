@@ -2,6 +2,7 @@ defmodule Astarte.VMQ.Plugin.AMQPClient do
   require Logger
   use GenServer
 
+  alias AMQP.Basic
   alias AMQP.Channel
   alias AMQP.Connection
   alias AMQP.Exchange
@@ -15,10 +16,25 @@ defmodule Astarte.VMQ.Plugin.AMQPClient do
     GenServer.start_link(__MODULE__, args, name: __MODULE__)
   end
 
+  def publish(payload, timestamp, headers, opts \\ []) do
+    GenServer.call(__MODULE__, {:publish, payload, timestamp, headers, opts})
+  end
+
   # Server callbacks
 
   def init(_args) do
     rabbitmq_connect(false)
+  end
+
+  def handle_call({:publish, payload, timestamp, headers, opts}, _from, chan) do
+    full_opts =
+      opts
+      |> Keyword.put(:timestamp, timestamp)
+      |> Keyword.put(:headers, headers)
+
+    res = Basic.publish(chan, Config.exchange_name(), "", payload, full_opts)
+
+    {:reply, res, chan}
   end
 
   def handle_info({:try_to_connect}, _state) do
