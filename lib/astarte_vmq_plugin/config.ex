@@ -16,11 +16,11 @@ defmodule Astarte.VMQ.Plugin.Config do
 
     Application.put_env(:astarte_vmq_plugin, :amqp_options, amqp_opts)
 
-    exchange_name =
-      Application.get_env(:astarte_vmq_plugin, :exchange_name, "vmq_all")
+    queue_name =
+      Application.get_env(:astarte_vmq_plugin, :queue_name, "vmq_all")
       |> to_string()
 
-    Application.put_env(:astarte_vmq_plugin, :exchange_name, exchange_name)
+    Application.put_env(:astarte_vmq_plugin, :queue_name, queue_name)
   end
 
   @doc """
@@ -31,10 +31,10 @@ defmodule Astarte.VMQ.Plugin.Config do
   end
 
   @doc """
-  Returns the name of the exchange to use for the publish
+  Returns the name of the queue used by Data Updater Plant
   """
-  def exchange_name do
-    Application.get_env(:astarte_vmq_plugin, :exchange_name)
+  def queue_name do
+    Application.get_env(:astarte_vmq_plugin, :queue_name)
   end
 
   defp normalize_opts_strings(amqp_options) do
