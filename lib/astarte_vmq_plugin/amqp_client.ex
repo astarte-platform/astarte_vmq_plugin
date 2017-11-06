@@ -31,6 +31,8 @@ defmodule Astarte.VMQ.Plugin.AMQPClient do
       opts
       |> Keyword.put(:timestamp, timestamp)
       |> Keyword.put(:headers, headers)
+      |> Keyword.put(:persistent, true)
+      |> Keyword.put(:mandatory, true) # TODO: handle basic.return
 
     res = Basic.publish(chan, Config.exchange_name(), "", payload, full_opts)
 
