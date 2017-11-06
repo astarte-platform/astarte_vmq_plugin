@@ -60,25 +60,15 @@ defmodule Astarte.VMQ.Plugin do
   end
 
   def on_client_gone({_mountpoint, client_id}) do
-    timestamp =
-      DateTime.utc_now()
-      |> DateTime.to_unix(:microseconds)
-
-    publish_event(client_id, "disconnection", timestamp)
+    publish_event(client_id, "disconnection", now_us_timestamp())
   end
 
   def on_client_offline({_mountpoint, client_id}) do
-    timestamp =
-      DateTime.utc_now()
-      |> DateTime.to_unix(:microseconds)
-
-    publish_event(client_id, "disconnection", timestamp)
+    publish_event(client_id, "disconnection", now_us_timestamp())
   end
 
   def on_register({ip_addr, _port}, {_mountpoint, client_id}, _username) do
-    timestamp =
-      DateTime.utc_now()
-      |> DateTime.to_unix(:microseconds)
+    timestamp = now_us_timestamp()
 
     ip_string =
       ip_addr
@@ -106,5 +96,10 @@ defmodule Astarte.VMQ.Plugin do
       # Not a device, ignoring it
       _ -> :ok
     end
+  end
+
+  defp now_us_timestamp do
+    DateTime.utc_now()
+    |> DateTime.to_unix(:microseconds)
   end
 end
