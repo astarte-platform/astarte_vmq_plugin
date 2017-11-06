@@ -1,0 +1,45 @@
+{mapping, "astarte_vmq_plugin.amqp.username", "astarte_vmq_plugin.amqp_options.username", [
+    {default, "guest"},
+    {datatype, string}
+  ]}.
+
+{mapping, "astarte_vmq_plugin.amqp.password", "astarte_vmq_plugin.amqp_options.password", [
+    {default, "guest"},
+    {datatype, string}
+  ]}.
+
+{mapping, "astarte_vmq_plugin.amqp.hostname", "astarte_vmq_plugin.amqp_options.hostname", [
+    {default, "localhost"},
+    {datatype, string}
+  ]}.
+
+{mapping, "astarte_vmq_plugin.amqp.port", "astarte_vmq_plugin.amqp_options.port", [
+    {default, 5672},
+    {datatype, integer}
+  ]}.
+
+{mapping, "astarte_vmq_plugin.amqp.ssl_cacertfile", "astarte_vmq_plugin.amqp_options.ssl_options.cacertfile", [
+    {datatype, file}
+  ]}.
+
+{mapping, "astarte_vmq_plugin.amqp.ssl_certfile", "astarte_vmq_plugin.amqp_options.ssl_options.certfile", [
+    {datatype, file}
+  ]}.
+
+{mapping, "astarte_vmq_plugin.amqp.ssl_keyfile", "astarte_vmq_plugin.amqp_options.ssl_options.keyfile", [
+    {datatype, file}
+  ]}.
+
+{mapping, "astarte_vmq_plugin.amqp.ssl_verify", "astarte_vmq_plugin.amqp_options.ssl_options.verify", [
+    {datatype, {enum, [verify_peer]}}
+  ]}.
+
+{mapping, "astarte_vmq_plugin.amqp.ssl_fail_if_no_peer_cert", "astarte_vmq_plugin.amqp_options.ssl_options.fail_if_no_peer_cert", [
+    {datatype, {enum, [true, false]}}
+  ]}.
+
+{mapping, "astarte_vmq_plugin.amqp.queue_name", "astarte_vmq_plugin.queue_name",
+  [
+    {default, "vmq_all"},
+    {datatype, string}
+  ]}.
