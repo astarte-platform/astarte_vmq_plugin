@@ -65,10 +65,6 @@ defmodule Astarte.VMQ.Plugin do
     :ok
   end
 
-  def on_client_wakeup({_mountpoint, _client_id}) do
-    :ok
-  end
-
   def on_register(_peer, {_mountpoint, _client_id}, _username) do
     :ok
   end

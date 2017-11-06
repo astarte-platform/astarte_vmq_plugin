@@ -24,7 +24,6 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
             {:auth_on_publish, Astarte.VMQ.Plugin, :auth_on_publish, 6, []},
             {:auth_on_register, Astarte.VMQ.Plugin, :auth_on_register, 5, []},
             {:auth_on_subscribe, Astarte.VMQ.Plugin, :auth_on_subscribe, 3, []},
-            {:on_client_wakeup, Astarte.VMQ.Plugin, :on_client_wakeup, 1, []},
             {:on_client_offline, Astarte.VMQ.Plugin, :on_client_offline, 1, []},
             {:on_client_gone, Astarte.VMQ.Plugin, :on_client_gone, 1, []},
             {:on_publish, Astarte.VMQ.Plugin, :on_publish, 6, []},
