@@ -3,6 +3,8 @@ defmodule Astarte.VMQ.Plugin do
   Documentation for Astarte.VMQ.Plugin.
   """
 
+  alias Astarte.VMQ.Plugin.AMQPClient
+
   def auth_on_register(_peer, {mountpoint, _client_id}, username, _password, _cleansession) do
     if !String.contains?(username, "/") do
       # Not a device, let someone else decide
@@ -57,19 +59,52 @@ defmodule Astarte.VMQ.Plugin do
     end
   end
 
-  def on_client_gone({_mountpoint, _client_id}) do
-    :ok
+  def on_client_gone({_mountpoint, client_id}) do
+    timestamp =
+      DateTime.utc_now()
+      |> DateTime.to_unix(:microseconds)
+
+    publish_event(client_id, "disconnection", timestamp)
   end
 
-  def on_client_offline({_mountpoint, _client_id}) do
-    :ok
+  def on_client_offline({_mountpoint, client_id}) do
+    timestamp =
+      DateTime.utc_now()
+      |> DateTime.to_unix(:microseconds)
+
+    publish_event(client_id, "disconnection", timestamp)
   end
 
-  def on_register(_peer, {_mountpoint, _client_id}, _username) do
-    :ok
+  def on_register({ip_addr, _port}, {_mountpoint, client_id}, _username) do
+    timestamp =
+      DateTime.utc_now()
+      |> DateTime.to_unix(:microseconds)
+
+    ip_string =
+      ip_addr
+      |> :inet.ntoa()
+      |> to_string()
+
+    publish_event(client_id, "connection", timestamp, x_astarte_remote_ip: ip_string)
   end
 
   def on_publish(_username, {_mountpoint, _client_id}, _qos, _topic, _payload, _isretain) do
     :ok
+  end
+
+  defp publish_event(client_id, event_string, timestamp, additional_headers \\ []) do
+    with [realm, device_id] <- String.split(client_id, "/") do
+      headers =
+        [x_astarte_vmqamqp_proto_ver: 1,
+         x_astarte_realm: realm,
+         x_astarte_device_id: device_id,
+         x_astarte_msg_type: event_string
+        ] ++ additional_headers
+
+      AMQPClient.publish("", timestamp, headers)
+    else
+      # Not a device, ignoring it
+      _ -> :ok
+    end
   end
 end
