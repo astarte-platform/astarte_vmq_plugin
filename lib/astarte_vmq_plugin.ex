@@ -78,8 +78,44 @@ defmodule Astarte.VMQ.Plugin do
     publish_event(client_id, "connection", timestamp, x_astarte_remote_ip: ip_string)
   end
 
-  def on_publish(_username, {_mountpoint, _client_id}, _qos, _topic, _payload, _isretain) do
-    :ok
+  def on_publish(_username, {_mountpoint, client_id}, _qos, topic, payload, _isretain) do
+    with [realm, device_id] <- String.split(client_id, "/") do
+      timestamp = now_us_timestamp()
+
+      case topic do
+        [^realm, ^device_id] ->
+          publish_introspection(realm, device_id, payload, timestamp)
+
+        [^realm, ^device_id, "control" | control_path_tokens] ->
+          control_path = "/" <> Enum.join(control_path_tokens, "/")
+          publish_control_message(realm, device_id, control_path, payload, timestamp)
+
+        [^realm, ^device_id, interface | path_tokens] ->
+          path = "/" <> Enum.join(path_tokens, "/")
+          publish_data(realm, device_id, interface, path, payload, timestamp)
+      end
+    else
+      # Not a device, ignoring it
+      _ -> :ok
+    end
+  end
+
+  defp publish_introspection(realm, device_id, payload, timestamp) do
+    publish(realm, device_id, payload, "introspection", timestamp)
+  end
+
+  defp publish_data(realm, device_id, interface, path, payload, timestamp) do
+    additional_headers =
+      [x_astarte_interface: interface,
+       x_astarte_path: path]
+
+    publish(realm, device_id, payload, "data", timestamp, additional_headers)
+  end
+
+  defp publish_control_message(realm, device_id, control_path, payload, timestamp) do
+    additional_headers = [x_astarte_control_path: control_path]
+
+    publish(realm, device_id, payload, "control", timestamp, additional_headers)
   end
 
   defp publish_event(client_id, event_string, timestamp, additional_headers \\ []) do
