@@ -17,9 +17,21 @@ defmodule Astarte.VMQ.PluginTest do
     {:ok, conn} = Connection.open(amqp_opts)
     {:ok, chan} = Channel.open(conn)
     Queue.declare(chan, Config.queue_name())
-    Queue.subscribe(chan, Config.queue_name(), fn payload, meta ->
-      send(self(), {payload, meta})
-    end)
+    {:ok, chan: chan}
+  end
+
+  setup %{chan: chan} do
+    test_pid = self()
+
+    {:ok, consumer_tag} =
+      Queue.subscribe(chan, Config.queue_name(), fn payload, meta ->
+        send(test_pid, {:amqp_msg, payload, meta})
+      end)
+
+    on_exit fn ->
+      Queue.unsubscribe(chan, consumer_tag)
+    end
+
     :ok
   end
 
