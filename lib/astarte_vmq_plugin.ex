@@ -22,16 +22,13 @@ defmodule Astarte.VMQ.Plugin do
     end
   end
 
-  def auth_on_publish(_username, {_mountpoint, client_id}, _qos, topic, _payload, _isretain) do
+  def auth_on_publish(_username, {_mountpoint, client_id}, _qos, topic_tokens, _payload, _isretain) do
     cond do
       # Not a device, authorizing everything
       !String.contains?(client_id, "/") ->
         :ok
-        # Topic is a single string
-      is_binary(topic) ->
-        {:error, :unauthorized}
-        # Device auth
-      String.split(client_id, "/") == Enum.take(topic, 2) ->
+      # Device auth
+      String.split(client_id, "/") == Enum.take(topic_tokens, 2) ->
         :ok
       true ->
         {:error, :unauthorized}
@@ -44,8 +41,8 @@ defmodule Astarte.VMQ.Plugin do
     else
       client_id_tokens = String.split(client_id, "/")
       authorized_topics =
-        Enum.filter(topics, fn {topic_path, _qos} ->
-          client_id_tokens == Enum.take(topic_path, 2)
+        Enum.filter(topics, fn {topic_tokens, _qos} ->
+          client_id_tokens == Enum.take(topic_tokens, 2)
         end)
 
       case authorized_topics do
@@ -74,11 +71,11 @@ defmodule Astarte.VMQ.Plugin do
     publish_event(client_id, "connection", timestamp, x_astarte_remote_ip: ip_string)
   end
 
-  def on_publish(_username, {_mountpoint, client_id}, _qos, topic, payload, _isretain) do
+  def on_publish(_username, {_mountpoint, client_id}, _qos, topic_tokens, payload, _isretain) do
     with [realm, device_id] <- String.split(client_id, "/") do
       timestamp = now_us_x10_timestamp()
 
-      case topic do
+      case topic_tokens do
         [^realm, ^device_id] ->
           publish_introspection(realm, device_id, payload, timestamp)
 
