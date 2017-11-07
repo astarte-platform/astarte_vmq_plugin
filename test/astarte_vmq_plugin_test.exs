@@ -120,4 +120,112 @@ defmodule Astarte.VMQ.PluginTest do
     assert :ok = Plugin.auth_on_publish(:dontcare, {:dontcare, @other_mqtt_user}, :dontcare, control_topic, :dontcare, :dontcare)
     assert :ok = Plugin.auth_on_publish(:dontcare, {:dontcare, @other_mqtt_user}, :dontcare, random_topic, :dontcare, :dontcare)
   end
+
+  test "device on_register" do
+    ip_addr = {2, 3, 4, 5}
+
+    Plugin.on_register({ip_addr, :dontcare}, {:dontcare, @device_base_path}, :dontcare)
+
+    assert_receive {:amqp_msg, "", %{headers: headers, timestamp: timestamp} = _metadata}
+
+    assert_in_delta timestamp, now_us_x10_timestamp(), 50000000 # 5 seconds
+
+    assert %{"x_astarte_vmqamqp_proto_ver" => 1,
+             "x_astarte_msg_type" => "connection",
+             "x_astarte_realm" => @realm,
+             "x_astarte_device_id" => @device_id,
+             "x_astarte_remote_ip" => "2.3.4.5"} = amqp_headers_to_map(headers)
+  end
+
+  test "device on_client_gone" do
+    Plugin.on_client_gone({:dontcare, @device_base_path})
+
+    assert_receive {:amqp_msg, "", %{headers: headers, timestamp: timestamp} = _metadata}
+
+    assert_in_delta timestamp, now_us_x10_timestamp(), 50000000 # 5 seconds
+
+    assert %{"x_astarte_vmqamqp_proto_ver" => 1,
+             "x_astarte_msg_type" => "disconnection",
+             "x_astarte_realm" => @realm,
+             "x_astarte_device_id" => @device_id} = amqp_headers_to_map(headers)
+  end
+
+  test "device on_client_offline" do
+    Plugin.on_client_offline({:dontcare, @device_base_path})
+
+    assert_receive {:amqp_msg, "", %{headers: headers, timestamp: timestamp} = _metadata}
+
+    assert_in_delta timestamp, now_us_x10_timestamp(), 50000000 # 5 seconds
+
+    assert %{"x_astarte_vmqamqp_proto_ver" => 1,
+             "x_astarte_msg_type" => "disconnection",
+             "x_astarte_realm" => @realm,
+             "x_astarte_device_id" => @device_id} = amqp_headers_to_map(headers)
+  end
+
+  test "device introspection on_publish" do
+    introspection_topic = [@realm, @device_id]
+    payload = "com.an.Interface:1:0;com.another.Interface:2:0"
+
+    Plugin.on_publish(:dontcare, {:dontcare, @device_base_path}, :dontcare, introspection_topic, payload, :dontcare)
+
+    assert_receive {:amqp_msg, ^payload, %{headers: headers, timestamp: timestamp} = _metadata}
+
+    assert_in_delta timestamp, now_us_x10_timestamp(), 50000000 # 5 seconds
+
+    assert %{"x_astarte_vmqamqp_proto_ver" => 1,
+             "x_astarte_msg_type" => "introspection",
+             "x_astarte_realm" => @realm,
+             "x_astarte_device_id" => @device_id} = amqp_headers_to_map(headers)
+  end
+
+  test "device control on_publish" do
+    control_path = "/some/control/path"
+    control_topic = [@realm, @device_id, "control"] ++ String.split(control_path, "/", trim: true)
+    payload = "payload"
+
+    Plugin.on_publish(:dontcare, {:dontcare, @device_base_path}, :dontcare, control_topic, payload, :dontcare)
+
+    assert_receive {:amqp_msg, ^payload, %{headers: headers, timestamp: timestamp} = _metadata}
+
+    assert_in_delta timestamp, now_us_x10_timestamp(), 50000000 # 5 seconds
+
+    assert %{"x_astarte_vmqamqp_proto_ver" => 1,
+             "x_astarte_msg_type" => "control",
+             "x_astarte_realm" => @realm,
+             "x_astarte_device_id" => @device_id,
+             "x_astarte_control_path" => ^control_path} = amqp_headers_to_map(headers)
+  end
+
+  test "device data on_publish" do
+    path = "/some/data/path"
+    interface = "com.my.Interface"
+    data_topic = [@realm, @device_id, interface] ++ String.split(path, "/", trim: true)
+    payload = "mypayload"
+
+    Plugin.on_publish(:dontcare, {:dontcare, @device_base_path}, :dontcare, data_topic, payload, :dontcare)
+
+    assert_receive {:amqp_msg, ^payload, %{headers: headers, timestamp: timestamp} = _metadata}
+
+    assert_in_delta timestamp, now_us_x10_timestamp(), 50000000 # 5 seconds
+
+    assert %{"x_astarte_vmqamqp_proto_ver" => 1,
+             "x_astarte_msg_type" => "data",
+             "x_astarte_realm" => @realm,
+             "x_astarte_device_id" => @device_id,
+             "x_astarte_interface" => ^interface,
+             "x_astarte_path" => ^path} = amqp_headers_to_map(headers)
+  end
+
+  defp amqp_headers_to_map(headers) do
+    Enum.reduce(headers, %{}, fn {key, _type, value}, acc ->
+      Map.put(acc, key, value)
+    end)
+  end
+
+  defp now_us_x10_timestamp do
+    DateTime.utc_now()
+    |> DateTime.to_unix(:microseconds)
+    |> Kernel.*(10)
+  end
 end
