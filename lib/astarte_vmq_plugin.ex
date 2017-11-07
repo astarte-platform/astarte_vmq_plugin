@@ -45,11 +45,7 @@ defmodule Astarte.VMQ.Plugin do
       client_id_tokens = String.split(client_id, "/")
       authorized_topics =
         Enum.filter(topics, fn {topic_path, _qos} ->
-          if is_binary(topic_path) do
-            false
-          else
-            client_id_tokens == Enum.take(topic_path, 2)
-          end
+          client_id_tokens == Enum.take(topic_path, 2)
         end)
 
       case authorized_topics do
