@@ -217,6 +217,38 @@ defmodule Astarte.VMQ.PluginTest do
              "x_astarte_path" => ^path} = amqp_headers_to_map(headers)
   end
 
+  test "non-device hooks don't send anything" do
+    ip_addr = {2, 3, 4, 5}
+
+    Plugin.on_register({ip_addr, :dontcare}, {:dontcare, @other_mqtt_user}, :dontcare)
+    Plugin.on_client_gone({:dontcare, @other_mqtt_user})
+    Plugin.on_client_offline({:dontcare, @other_mqtt_user})
+
+    introspection_topic = [@realm, @device_id]
+    payload = "com.an.Interface:1:0;com.another.Interface:2:0"
+
+    Plugin.on_publish(:dontcare, {:dontcare, @other_mqtt_user}, :dontcare, introspection_topic, payload, :dontcare)
+
+    control_path = "/some/control/path"
+    control_topic = [@realm, @device_id, "control"] ++ String.split(control_path, "/", trim: true)
+    payload = "payload"
+
+    Plugin.on_publish(:dontcare, {:dontcare, @other_mqtt_user}, :dontcare, control_topic, payload, :dontcare)
+
+    path = "/some/data/path"
+    interface = "com.my.Interface"
+    data_topic = [@realm, @device_id, interface] ++ String.split(path, "/", trim: true)
+    payload = "mypayload"
+
+    Plugin.on_publish(:dontcare, {:dontcare, @other_mqtt_user}, :dontcare, data_topic, payload, :dontcare)
+
+    random_topic = ["random", "topic"]
+
+    Plugin.on_publish(:dontcare, {:dontcare, @other_mqtt_user}, :dontcare, random_topic, "test", :dontcare)
+
+    refute_receive {:amqp_msg, _payload, _meta}
+  end
+
   defp amqp_headers_to_map(headers) do
     Enum.reduce(headers, %{}, fn {key, _type, value}, acc ->
       Map.put(acc, key, value)
