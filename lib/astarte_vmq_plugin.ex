@@ -84,18 +84,22 @@ defmodule Astarte.VMQ.Plugin do
 
   defp publish_event(client_id, event_string, timestamp, additional_headers \\ []) do
     with [realm, device_id] <- String.split(client_id, "/") do
-      headers =
-        [x_astarte_vmqamqp_proto_ver: 1,
-         x_astarte_realm: realm,
-         x_astarte_device_id: device_id,
-         x_astarte_msg_type: event_string
-        ] ++ additional_headers
-
-      AMQPClient.publish("", timestamp, headers)
+      publish(realm, device_id, "", event_string, timestamp, additional_headers)
     else
       # Not a device, ignoring it
       _ -> :ok
     end
+  end
+
+  defp publish(realm, device_id, payload, event_string, timestamp, additional_headers \\ []) do
+    headers =
+      [x_astarte_vmqamqp_proto_ver: 1,
+       x_astarte_realm: realm,
+       x_astarte_device_id: device_id,
+       x_astarte_msg_type: event_string
+      ] ++ additional_headers
+
+    AMQPClient.publish(payload, timestamp, headers)
   end
 
   defp now_us_timestamp do
