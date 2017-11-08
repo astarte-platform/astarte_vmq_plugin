@@ -25,6 +25,11 @@ defmodule Astarte.VMQ.Plugin.AMQPClient do
     rabbitmq_connect(false)
   end
 
+  def terminate(_reason, %Channel{conn: conn} = chan) do
+    Channel.close(chan)
+    Connection.close(conn)
+  end
+
   def handle_call({:publish, payload, timestamp, headers, opts}, _from, chan) do
     full_opts =
       opts
