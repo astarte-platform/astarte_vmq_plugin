@@ -8,7 +8,7 @@
     {datatype, string}
   ]}.
 
-{mapping, "astarte_vmq_plugin.amqp.hostname", "astarte_vmq_plugin.amqp_options.hostname", [
+{mapping, "astarte_vmq_plugin.amqp.host", "astarte_vmq_plugin.amqp_options.host", [
     {default, "localhost"},
     {datatype, string}
   ]}.
