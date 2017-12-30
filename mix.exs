@@ -16,7 +16,7 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger],
+      extra_applications: [:logger, :amqp],
       mod: {Astarte.VMQ.Plugin.Application, []},
       env: [
         vmq_plugin_hooks:
