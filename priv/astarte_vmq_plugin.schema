@@ -18,6 +18,11 @@
     {datatype, integer}
   ]}.
 
+{mapping, "astarte_vmq_plugin.amqp.virtual_host", "astarte_vmq_plugin.amqp_options.virtual_host", [
+    {default, "/"},
+    {datatype, string}
+  ]}.
+
 {mapping, "astarte_vmq_plugin.amqp.ssl_cacertfile", "astarte_vmq_plugin.amqp_options.ssl_options.cacertfile", [
     {datatype, file}
   ]}.
