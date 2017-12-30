@@ -8,7 +8,7 @@
     {datatype, string}
   ]}.
 
-{mapping, "astarte_vmq_plugin.amqp.hostname", "astarte_vmq_plugin.amqp_options.hostname", [
+{mapping, "astarte_vmq_plugin.amqp.host", "astarte_vmq_plugin.amqp_options.host", [
     {default, "localhost"},
     {datatype, string}
   ]}.
@@ -16,6 +16,11 @@
 {mapping, "astarte_vmq_plugin.amqp.port", "astarte_vmq_plugin.amqp_options.port", [
     {default, 5672},
     {datatype, integer}
+  ]}.
+
+{mapping, "astarte_vmq_plugin.amqp.virtual_host", "astarte_vmq_plugin.amqp_options.virtual_host", [
+    {default, "/"},
+    {datatype, string}
   ]}.
 
 {mapping, "astarte_vmq_plugin.amqp.ssl_cacertfile", "astarte_vmq_plugin.amqp_options.ssl_options.cacertfile", [
