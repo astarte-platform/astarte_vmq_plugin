@@ -48,3 +48,8 @@
     {default, "vmq_all"},
     {datatype, string}
   ]}.
+
+{mapping, "astarte_vmq_plugin.amqp.mirror_queue_name", "astarte_vmq_plugin.mirror_queue_name",
+  [
+    {datatype, string}
+  ]}.

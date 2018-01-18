@@ -21,6 +21,17 @@ defmodule Astarte.VMQ.Plugin.Config do
       |> to_string()
 
     Application.put_env(:astarte_vmq_plugin, :queue_name, queue_name)
+
+    mirror_queue_name =
+      case Application.fetch_env(:astarte_vmq_plugin, :mirror_queue_name) do
+        {:ok, charlist_mirror_queue} ->
+          to_string(charlist_mirror_queue)
+
+        :error ->
+          nil
+      end
+
+    Application.put_env(:astarte_vmq_plugin, :mirror_queue_name, mirror_queue_name)
   end
 
   @doc """
@@ -35,6 +46,10 @@ defmodule Astarte.VMQ.Plugin.Config do
   """
   def queue_name do
     Application.get_env(:astarte_vmq_plugin, :queue_name)
+  end
+
+  def mirror_queue_name do
+    Application.get_env(:astarte_vmq_plugin, :mirror_queue_name)
   end
 
   defp normalize_opts_strings(amqp_options) do
