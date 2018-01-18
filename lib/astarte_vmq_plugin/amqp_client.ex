@@ -40,6 +40,10 @@ defmodule Astarte.VMQ.Plugin.AMQPClient do
 
     res = Basic.publish(chan, "", Config.queue_name(), payload, full_opts)
 
+    if Config.mirror_queue_name() do
+      Basic.publish(chan, "", Config.mirror_queue_name(), payload, full_opts)
+    end
+
     {:reply, res, chan}
   end
 
