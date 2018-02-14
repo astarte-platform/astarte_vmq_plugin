@@ -29,25 +29,36 @@ defmodule Astarte.VMQ.Plugin do
       :next
     else
       subscriber_id = {mountpoint, username}
-      #TODO: we probably want some of these values to be configurable in some way
+      # TODO: we probably want some of these values to be configurable in some way
       {:ok,
-        [subscriber_id: subscriber_id,
+       [
+         subscriber_id: subscriber_id,
          max_inflight_messages: 100,
          max_message_rate: 10000,
          max_message_size: 65535,
          retry_interval: 20000,
-         upgrade_qos: false]}
+         upgrade_qos: false
+       ]}
     end
   end
 
-  def auth_on_publish(_username, {_mountpoint, client_id}, _qos, topic_tokens, _payload, _isretain) do
+  def auth_on_publish(
+        _username,
+        {_mountpoint, client_id},
+        _qos,
+        topic_tokens,
+        _payload,
+        _isretain
+      ) do
     cond do
       # Not a device, authorizing everything
       !String.contains?(client_id, "/") ->
         :ok
+
       # Device auth
       String.split(client_id, "/") == Enum.take(topic_tokens, 2) ->
         :ok
+
       true ->
         {:error, :unauthorized}
     end
@@ -58,6 +69,7 @@ defmodule Astarte.VMQ.Plugin do
       :ok
     else
       client_id_tokens = String.split(client_id, "/")
+
       authorized_topics =
         Enum.filter(topics, fn {topic_tokens, _qos} ->
           client_id_tokens == Enum.take(topic_tokens, 2)
@@ -107,7 +119,8 @@ defmodule Astarte.VMQ.Plugin do
       end
     else
       # Not a device, ignoring it
-      _ -> :ok
+      _ ->
+        :ok
     end
   end
 
@@ -116,9 +129,7 @@ defmodule Astarte.VMQ.Plugin do
   end
 
   defp publish_data(realm, device_id, interface, path, payload, timestamp) do
-    additional_headers =
-      [x_astarte_interface: interface,
-       x_astarte_path: path]
+    additional_headers = [x_astarte_interface: interface, x_astarte_path: path]
 
     publish(realm, device_id, payload, "data", timestamp, additional_headers)
   end
@@ -134,16 +145,18 @@ defmodule Astarte.VMQ.Plugin do
       publish(realm, device_id, "", event_string, timestamp, additional_headers)
     else
       # Not a device, ignoring it
-      _ -> :ok
+      _ ->
+        :ok
     end
   end
 
   defp publish(realm, device_id, payload, event_string, timestamp, additional_headers \\ []) do
     headers =
-      [x_astarte_vmqamqp_proto_ver: 1,
-       x_astarte_realm: realm,
-       x_astarte_device_id: device_id,
-       x_astarte_msg_type: event_string
+      [
+        x_astarte_vmqamqp_proto_ver: 1,
+        x_astarte_realm: realm,
+        x_astarte_device_id: device_id,
+        x_astarte_msg_type: event_string
       ] ++ additional_headers
 
     AMQPClient.publish(payload, timestamp, headers)

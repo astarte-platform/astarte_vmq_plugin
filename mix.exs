@@ -24,9 +24,14 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
       app: :astarte_vmq_plugin,
       version: "0.1.0",
       elixir: "~> 1.5",
-      start_permanent: Mix.env == :prod,
+      start_permanent: Mix.env() == :prod,
       test_coverage: [tool: ExCoveralls],
-      preferred_cli_env: ["coveralls": :test, "coveralls.detail": :test, "coveralls.post": :test, "coveralls.html": :test],
+      preferred_cli_env: [
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.html": :test
+      ],
       deps: deps()
     ]
   end
@@ -37,16 +42,15 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
       extra_applications: [:logger, :amqp],
       mod: {Astarte.VMQ.Plugin.Application, []},
       env: [
-        vmq_plugin_hooks:
-          [
-            {:auth_on_publish, Astarte.VMQ.Plugin, :auth_on_publish, 6, []},
-            {:auth_on_register, Astarte.VMQ.Plugin, :auth_on_register, 5, []},
-            {:auth_on_subscribe, Astarte.VMQ.Plugin, :auth_on_subscribe, 3, []},
-            {:on_client_offline, Astarte.VMQ.Plugin, :on_client_offline, 1, []},
-            {:on_client_gone, Astarte.VMQ.Plugin, :on_client_gone, 1, []},
-            {:on_publish, Astarte.VMQ.Plugin, :on_publish, 6, []},
-            {:on_register, Astarte.VMQ.Plugin, :on_register, 3, []},
-          ],
+        vmq_plugin_hooks: [
+          {:auth_on_publish, Astarte.VMQ.Plugin, :auth_on_publish, 6, []},
+          {:auth_on_register, Astarte.VMQ.Plugin, :auth_on_register, 5, []},
+          {:auth_on_subscribe, Astarte.VMQ.Plugin, :auth_on_subscribe, 3, []},
+          {:on_client_offline, Astarte.VMQ.Plugin, :on_client_offline, 1, []},
+          {:on_client_gone, Astarte.VMQ.Plugin, :on_client_gone, 1, []},
+          {:on_publish, Astarte.VMQ.Plugin, :on_publish, 6, []},
+          {:on_register, Astarte.VMQ.Plugin, :on_register, 3, []}
+        ]
       ]
     ]
   end
@@ -55,7 +59,6 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
   defp deps do
     [
       {:amqp, "~> 1.0.0-pre.2"},
-
       {:excoveralls, "~> 0.7", only: :test},
       {:distillery, "~> 1.5", runtime: false}
     ]

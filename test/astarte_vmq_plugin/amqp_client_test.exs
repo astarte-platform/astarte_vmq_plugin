@@ -50,5 +50,4 @@ defmodule Astarte.VMQ.Plugin.AMQPClientTest do
     assert chan != new_chan
     assert Process.alive?(new_chan.conn.pid)
   end
-
 end
