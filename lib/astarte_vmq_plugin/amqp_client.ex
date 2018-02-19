@@ -49,12 +49,13 @@ defmodule Astarte.VMQ.Plugin.AMQPClient do
   end
 
   def handle_call({:publish, payload, timestamp, headers, opts}, _from, chan) do
+    # TODO: handle basic.return
     full_opts =
       opts
       |> Keyword.put(:timestamp, timestamp)
       |> Keyword.put(:headers, headers)
       |> Keyword.put(:persistent, true)
-      |> Keyword.put(:mandatory, true) # TODO: handle basic.return
+      |> Keyword.put(:mandatory, true)
 
     res = Basic.publish(chan, "", Config.queue_name(), payload, full_opts)
 
@@ -81,13 +82,12 @@ defmodule Astarte.VMQ.Plugin.AMQPClient do
          # Get notifications when the connection goes down
          Process.monitor(conn.pid),
          {:ok, chan} <- Channel.open(conn) do
-
       {:ok, chan}
-
     else
       {:error, reason} ->
         Logger.warn("RabbitMQ Connection error: " <> inspect(reason))
         maybe_retry(retry)
+
       :error ->
         Logger.warn("Unknown RabbitMQ connection error")
         maybe_retry(retry)
