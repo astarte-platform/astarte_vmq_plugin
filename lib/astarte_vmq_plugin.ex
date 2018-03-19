@@ -23,6 +23,11 @@ defmodule Astarte.VMQ.Plugin do
 
   alias Astarte.VMQ.Plugin.AMQPClient
 
+  def auth_on_register(_peer, _subscriber_id, :undefined, _password, _cleansession) do
+    # If it doesn't have a username we let someone else decide
+    :next
+  end
+
   def auth_on_register(_peer, {mountpoint, _client_id}, username, _password, _cleansession) do
     if !String.contains?(username, "/") do
       # Not a device, let someone else decide
