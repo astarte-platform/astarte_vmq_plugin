@@ -42,7 +42,7 @@ FROM debian:jessie-slim
 ENV LANG C.UTF-8
 
 # We need SSL, curl, iproute2 and jq - and to ensure /etc/ssl/astarte
-RUN apt-get -qq update && apt-get -qq install libssl1.0.0 curl jq iproute2 && apt-get clean && mkdir -p /etc/ssl/astarte
+RUN apt-get -qq update && apt-get -qq install libssl1.0.0 curl jq iproute2 netcat && apt-get clean && mkdir -p /etc/ssl/astarte
 
 # Copy our built stuff (both are self-contained with their ERTS release)
 COPY --from=builder /build/vernemq/_build/default/rel/vernemq /opt/vernemq/
