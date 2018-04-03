@@ -48,6 +48,9 @@ RUN apt-get -qq update && apt-get -qq install libssl1.0.0 curl jq iproute2 && ap
 COPY --from=builder /build/vernemq/_build/default/rel/vernemq /opt/vernemq/
 COPY --from=builder /build/astarte_vmq_plugin/_build/prod/rel/astarte_vmq_plugin /opt/astarte_vmq_plugin/
 
+# Add the wait-for utility
+RUN cd /usr/bin && curl -O https://raw.githubusercontent.com/eficode/wait-for/master/wait-for && chmod +x wait-for && cd -
+
 # MQTT
 EXPOSE 1883
 
