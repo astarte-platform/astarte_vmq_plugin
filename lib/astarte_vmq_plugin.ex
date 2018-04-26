@@ -167,7 +167,7 @@ defmodule Astarte.VMQ.Plugin do
         x_astarte_msg_type: event_string
       ] ++ additional_headers
 
-    AMQPClient.publish(payload, timestamp, headers)
+    AMQPClient.publish(payload, headers: headers, timestamp: timestamp)
   end
 
   defp now_us_x10_timestamp do
