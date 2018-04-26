@@ -260,12 +260,15 @@ defmodule Astarte.VMQ.PluginTest do
     assert_in_delta timestamp, now_us_x10_timestamp(), 50_000_000
 
     assert %{
+             "message_id" => message_id,
              "x_astarte_vmqamqp_proto_ver" => 1,
              "x_astarte_msg_type" => "connection",
              "x_astarte_realm" => @realm,
              "x_astarte_device_id" => @device_id,
              "x_astarte_remote_ip" => "2.3.4.5"
            } = amqp_headers_to_map(headers)
+
+    assert String.starts_with?(message_id, message_id_prefix(@realm, @device_id, timestamp))
   end
 
   test "device on_client_gone" do
@@ -277,11 +280,14 @@ defmodule Astarte.VMQ.PluginTest do
     assert_in_delta timestamp, now_us_x10_timestamp(), 50_000_000
 
     assert %{
+             "message_id" => message_id,
              "x_astarte_vmqamqp_proto_ver" => 1,
              "x_astarte_msg_type" => "disconnection",
              "x_astarte_realm" => @realm,
              "x_astarte_device_id" => @device_id
            } = amqp_headers_to_map(headers)
+
+    assert String.starts_with?(message_id, message_id_prefix(@realm, @device_id, timestamp))
   end
 
   test "device on_client_offline" do
@@ -293,11 +299,14 @@ defmodule Astarte.VMQ.PluginTest do
     assert_in_delta timestamp, now_us_x10_timestamp(), 50_000_000
 
     assert %{
+             "message_id" => message_id,
              "x_astarte_vmqamqp_proto_ver" => 1,
              "x_astarte_msg_type" => "disconnection",
              "x_astarte_realm" => @realm,
              "x_astarte_device_id" => @device_id
            } = amqp_headers_to_map(headers)
+
+    assert String.starts_with?(message_id, message_id_prefix(@realm, @device_id, timestamp))
   end
 
   test "device introspection on_publish" do
@@ -319,11 +328,14 @@ defmodule Astarte.VMQ.PluginTest do
     assert_in_delta timestamp, now_us_x10_timestamp(), 50_000_000
 
     assert %{
+             "message_id" => message_id,
              "x_astarte_vmqamqp_proto_ver" => 1,
              "x_astarte_msg_type" => "introspection",
              "x_astarte_realm" => @realm,
              "x_astarte_device_id" => @device_id
            } = amqp_headers_to_map(headers)
+
+    assert String.starts_with?(message_id, message_id_prefix(@realm, @device_id, timestamp))
   end
 
   test "device control on_publish" do
@@ -346,12 +358,15 @@ defmodule Astarte.VMQ.PluginTest do
     assert_in_delta timestamp, now_us_x10_timestamp(), 50_000_000
 
     assert %{
+             "message_id" => message_id,
              "x_astarte_vmqamqp_proto_ver" => 1,
              "x_astarte_msg_type" => "control",
              "x_astarte_realm" => @realm,
              "x_astarte_device_id" => @device_id,
              "x_astarte_control_path" => ^control_path
            } = amqp_headers_to_map(headers)
+
+    assert String.starts_with?(message_id, message_id_prefix(@realm, @device_id, timestamp))
   end
 
   test "device data on_publish" do
@@ -375,6 +390,7 @@ defmodule Astarte.VMQ.PluginTest do
     assert_in_delta timestamp, now_us_x10_timestamp(), 50_000_000
 
     assert %{
+             "message_id" => message_id,
              "x_astarte_vmqamqp_proto_ver" => 1,
              "x_astarte_msg_type" => "data",
              "x_astarte_realm" => @realm,
@@ -382,6 +398,8 @@ defmodule Astarte.VMQ.PluginTest do
              "x_astarte_interface" => ^interface,
              "x_astarte_path" => ^path
            } = amqp_headers_to_map(headers)
+
+    assert String.starts_with?(message_id, message_id_prefix(@realm, @device_id, timestamp))
   end
 
   test "non-device hooks don't send anything" do
@@ -454,5 +472,12 @@ defmodule Astarte.VMQ.PluginTest do
     DateTime.utc_now()
     |> DateTime.to_unix(:microseconds)
     |> Kernel.*(10)
+  end
+
+  defp message_id_prefix(realm, device_id, timestamp) do
+    realm_trunc = String.slice(realm, 0..63)
+    device_id_trunc = String.slice(device_id, 0..15)
+    timestamp_hex_str = Integer.to_string(timestamp, 16)
+    "#{realm_trunc}-#{device_id_trunc}-#{timestamp_hex_str}-"
   end
 end

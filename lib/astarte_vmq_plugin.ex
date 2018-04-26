@@ -23,6 +23,8 @@ defmodule Astarte.VMQ.Plugin do
 
   alias Astarte.VMQ.Plugin.AMQPClient
 
+  @max_rand trunc(:math.pow(2, 32) - 1)
+
   def auth_on_register(_peer, _subscriber_id, :undefined, _password, _cleansession) do
     # If it doesn't have a username we let someone else decide
     :next
@@ -158,6 +160,7 @@ defmodule Astarte.VMQ.Plugin do
   defp publish(realm, device_id, payload, event_string, timestamp, additional_headers \\ []) do
     headers =
       [
+        message_id: generate_message_id(realm, device_id, timestamp),
         x_astarte_vmqamqp_proto_ver: 1,
         x_astarte_realm: realm,
         x_astarte_device_id: device_id,
@@ -171,5 +174,14 @@ defmodule Astarte.VMQ.Plugin do
     DateTime.utc_now()
     |> DateTime.to_unix(:microseconds)
     |> Kernel.*(10)
+  end
+
+  defp generate_message_id(realm, device_id, timestamp) do
+    realm_trunc = String.slice(realm, 0..63)
+    device_id_trunc = String.slice(device_id, 0..15)
+    timestamp_hex_str = Integer.to_string(timestamp, 16)
+    rnd = Enum.random(0..@max_rand) |> Integer.to_string(16)
+
+    "#{realm_trunc}-#{device_id_trunc}-#{timestamp_hex_str}-#{rnd}"
   end
 end
