@@ -33,8 +33,8 @@ defmodule Astarte.VMQ.Plugin.AMQPClient do
     GenServer.start_link(__MODULE__, args, name: __MODULE__)
   end
 
-  def publish(payload, timestamp, headers, opts \\ []) do
-    GenServer.call(__MODULE__, {:publish, payload, timestamp, headers, opts})
+  def publish(payload, opts \\ []) do
+    GenServer.call(__MODULE__, {:publish, payload, opts})
   end
 
   # Server callbacks
@@ -48,12 +48,10 @@ defmodule Astarte.VMQ.Plugin.AMQPClient do
     Connection.close(conn)
   end
 
-  def handle_call({:publish, payload, timestamp, headers, opts}, _from, chan) do
+  def handle_call({:publish, payload, opts}, _from, chan) do
     # TODO: handle basic.return
     full_opts =
       opts
-      |> Keyword.put(:timestamp, timestamp)
-      |> Keyword.put(:headers, headers)
       |> Keyword.put(:persistent, true)
       |> Keyword.put(:mandatory, true)
 

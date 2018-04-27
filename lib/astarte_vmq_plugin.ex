@@ -160,14 +160,15 @@ defmodule Astarte.VMQ.Plugin do
   defp publish(realm, device_id, payload, event_string, timestamp, additional_headers \\ []) do
     headers =
       [
-        message_id: generate_message_id(realm, device_id, timestamp),
         x_astarte_vmqamqp_proto_ver: 1,
         x_astarte_realm: realm,
         x_astarte_device_id: device_id,
         x_astarte_msg_type: event_string
       ] ++ additional_headers
 
-    AMQPClient.publish(payload, timestamp, headers)
+    message_id = generate_message_id(realm, device_id, timestamp)
+
+    AMQPClient.publish(payload, headers: headers, message_id: message_id, timestamp: timestamp)
   end
 
   defp now_us_x10_timestamp do
