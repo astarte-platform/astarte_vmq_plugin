@@ -36,13 +36,13 @@ COPY bin/vernemq.sh /build/vernemq/_build/default/rel/vernemq/bin/
 RUN chmod +x /build/vernemq/_build/default/rel/vernemq/bin/vernemq.sh
 
 # Note: it is important to keep Debian versions in sync, or incompatibilities between libcrypto will happen
-FROM debian:jessie-slim
+FROM debian:stretch-slim
 
 # Set the locale
 ENV LANG C.UTF-8
 
 # We need SSL, curl, iproute2 and jq - and to ensure /etc/ssl/astarte
-RUN apt-get -qq update && apt-get -qq install libssl1.0.0 curl jq iproute2 netcat && apt-get clean && mkdir -p /etc/ssl/astarte
+RUN apt-get -qq update && apt-get -qq install libssl1.1 curl jq iproute2 netcat && apt-get clean && mkdir -p /etc/ssl/astarte
 
 # Copy our built stuff (both are self-contained with their ERTS release)
 COPY --from=builder /build/vernemq/_build/default/rel/vernemq /opt/vernemq/
