@@ -53,3 +53,18 @@
   [
     {datatype, string}
   ]}.
+
+{mapping, "astarte_vmq_plugin.registry_mfa", "astarte_vmq_plugin.registry_mfa",
+  [
+    {default, "{vmq_reg,direct_plugin_exports,[astarte_vmq_plugin]}"},
+    {datatype, string},
+    hidden
+  ]}.
+
+{translation, "astarte_vmq_plugin.registry_mfa",
+  fun(Conf) ->
+    S = cuttlefish:conf_get("astarte_vmq_plugin.registry_mfa", Conf),
+    {ok, T, _} = erl_scan:string(S ++ "."),
+    {ok, Term} = erl_parse:parse_term(T),
+    Term
+  end}.
