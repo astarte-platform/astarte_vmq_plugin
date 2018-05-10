@@ -32,7 +32,7 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
         "coveralls.post": :test,
         "coveralls.html": :test
       ],
-      deps: deps()
+      deps: deps() ++ astarte_required_modules(System.get_env("ASTARTE_IN_UMBRELLA"))
     ]
   end
 
@@ -52,6 +52,18 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
           {:on_register, Astarte.VMQ.Plugin, :on_register, 3, []}
         ]
       ]
+    ]
+  end
+
+  defp astarte_required_modules("true") do
+    [
+      {:astarte_rpc, in_umbrella: true}
+    ]
+  end
+
+  defp astarte_required_modules(_) do
+    [
+      {:astarte_rpc, git: "https://git.ispirata.com/Astarte-NG/astarte_rpc"}
     ]
   end
 
