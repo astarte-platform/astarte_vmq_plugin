@@ -23,3 +23,6 @@ config :astarte_vmq_plugin, :amqp_options,
 
 config :astarte_vmq_plugin, :queue_name,
   "test_queue"
+
+config :astarte_vmq_plugin, :registry_mfa,
+  {Astarte.VMQ.Plugin.MockVerne, :get_functions, []}
