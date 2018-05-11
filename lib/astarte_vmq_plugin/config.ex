@@ -50,6 +50,18 @@ defmodule Astarte.VMQ.Plugin.Config do
       end
 
     Application.put_env(:astarte_vmq_plugin, :mirror_queue_name, mirror_queue_name)
+
+    # Check if we have rpc specific config, if not fall back to :astarte_vmq_plugin :amqp_options)
+    astarte_rpc_amqp_opts =
+      case Application.fetch_env(:astarte_rpc, :amqp_connection) do
+        {:ok, charlist_amqp_opts} ->
+          normalize_opts_strings(charlist_amqp_opts)
+
+        :error ->
+          amqp_opts
+      end
+
+    Application.put_env(:astarte_rpc, :amqp_connection, astarte_rpc_amqp_opts)
   end
 
   @doc """
