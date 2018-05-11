@@ -79,6 +79,7 @@ defmodule Astarte.VMQ.Plugin.Config do
       {:username, value} -> {:username, to_string(value)}
       {:password, value} -> {:password, to_string(value)}
       {:virtual_host, value} -> {:virtual_host, to_string(value)}
+      {:host, value} -> {:host, to_string(value)}
       other -> other
     end)
   end
