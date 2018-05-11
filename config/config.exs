@@ -20,4 +20,7 @@
 # and its dependencies with the aid of the Mix.Config module.
 use Mix.Config
 
+config :lager,
+  handlers: [level: :critical]
+
 import_config "#{Mix.env}.exs"
