@@ -70,6 +70,10 @@ defmodule Astarte.VMQ.Plugin.Config do
     Application.get_env(:astarte_vmq_plugin, :mirror_queue_name)
   end
 
+  def registry_mfa do
+    Application.get_env(:astarte_vmq_plugin, :registry_mfa)
+  end
+
   defp normalize_opts_strings(amqp_options) do
     Enum.map(amqp_options, fn
       {:username, value} -> {:username, to_string(value)}
