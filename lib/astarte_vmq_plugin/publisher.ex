@@ -7,6 +7,11 @@ defmodule Astarte.VMQ.Plugin.Publisher do
     GenServer.start_link(__MODULE__, args, name: __MODULE__)
   end
 
+  def publish([token | _rest] = topic, payload, qos)
+      when is_binary(token) and is_binary(payload) and is_integer(qos) do
+    GenServer.call(__MODULE__, {:publish, topic, payload, qos})
+  end
+
   # Callbacks
 
   def init([registry_mfa]) do
@@ -16,5 +21,10 @@ defmodule Astarte.VMQ.Plugin.Publisher do
     true = is_function(publish_fun, 3)
     :ok = register_fun.()
     {:ok, %{publish_fun: publish_fun}}
+  end
+
+  def handle_call({:publish, topic, payload, qos}, _from, %{publish_fun: publish_fun} = state) do
+    reply = publish_fun.(topic, payload, %{qos: qos})
+    {:reply, reply, state}
   end
 end
