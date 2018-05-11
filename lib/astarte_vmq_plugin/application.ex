@@ -30,7 +30,8 @@ defmodule Astarte.VMQ.Plugin.Application do
 
     # List all child processes to be supervised
     children = [
-      Astarte.VMQ.Plugin.AMQPClient
+      Astarte.VMQ.Plugin.AMQPClient,
+      {Astarte.VMQ.Plugin.Publisher, [Config.registry_mfa()]}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
