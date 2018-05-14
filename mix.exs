@@ -24,6 +24,7 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
       app: :astarte_vmq_plugin,
       version: "0.1.0",
       elixir: "~> 1.5",
+      elixirc_paths: elixirc_paths(Mix.env),
       start_permanent: Mix.env() == :prod,
       test_coverage: [tool: ExCoveralls],
       preferred_cli_env: [
@@ -32,7 +33,7 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
         "coveralls.post": :test,
         "coveralls.html": :test
       ],
-      deps: deps()
+      deps: deps() ++ astarte_required_modules(System.get_env("ASTARTE_IN_UMBRELLA"))
     ]
   end
 
@@ -52,6 +53,21 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
           {:on_register, Astarte.VMQ.Plugin, :on_register, 3, []}
         ]
       ]
+    ]
+  end
+
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_), do: ["lib"]
+
+  defp astarte_required_modules("true") do
+    [
+      {:astarte_rpc, in_umbrella: true}
+    ]
+  end
+
+  defp astarte_required_modules(_) do
+    [
+      {:astarte_rpc, git: "https://git.ispirata.com/Astarte-NG/astarte_rpc"}
     ]
   end
 

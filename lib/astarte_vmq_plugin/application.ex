@@ -23,6 +23,8 @@ defmodule Astarte.VMQ.Plugin.Application do
 
   use Application
 
+  alias Astarte.VMQ.Plugin.RPC.Handler, as: RPCHandler
+  alias Astarte.RPC.Protocol.VMQ.Plugin, as: Protocol
   alias Astarte.VMQ.Plugin.Config
 
   def start(_type, _args) do
@@ -30,7 +32,9 @@ defmodule Astarte.VMQ.Plugin.Application do
 
     # List all child processes to be supervised
     children = [
-      Astarte.VMQ.Plugin.AMQPClient
+      Astarte.VMQ.Plugin.AMQPClient,
+      {Astarte.VMQ.Plugin.Publisher, [Config.registry_mfa()]},
+      {Astarte.RPC.AMQP.Server, [amqp_queue: Protocol.amqp_queue(), handler: RPCHandler]}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

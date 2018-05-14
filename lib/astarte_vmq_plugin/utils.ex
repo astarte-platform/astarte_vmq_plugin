@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2017 Ispirata Srl
+# Copyright (C) 2018 Ispirata Srl
 #
 # This file is part of Astarte.
 # Astarte is free software: you can redistribute it and/or modify
@@ -16,13 +16,19 @@
 # along with Astarte.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-use Mix.Config
+defmodule Astarte.VMQ.Plugin.Utils do
+  @moduledoc """
+  Utilities module
+  """
 
-config :astarte_vmq_plugin, :amqp_options,
-  host: "rabbitmq"
+  @doc """
+  Return functions with the same format of the one returned by :vmq_reg.direct_plugin_exports.
+  Useful to make sure we can run the application interactively without Verne
+  """
+  def empty_plugin_functions do
+    empty_fun_0 = fn -> :ok end
+    empty_fun_3 = fn _, _, _ -> :ok end
 
-config :astarte_vmq_plugin, :queue_name,
-  "test_queue"
-
-config :astarte_vmq_plugin, :registry_mfa,
-  {Astarte.VMQ.Plugin.MockVerne, :get_functions, []}
+    {empty_fun_0, empty_fun_3, {nil, nil}}
+  end
+end

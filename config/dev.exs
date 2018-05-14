@@ -17,3 +17,6 @@
 #
 
 use Mix.Config
+
+config :astarte_vmq_plugin, :registry_mfa,
+  {Astarte.VMQ.Plugin.Utils, :empty_plugin_functions, []}

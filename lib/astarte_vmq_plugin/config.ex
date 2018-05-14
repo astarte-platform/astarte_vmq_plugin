@@ -50,6 +50,18 @@ defmodule Astarte.VMQ.Plugin.Config do
       end
 
     Application.put_env(:astarte_vmq_plugin, :mirror_queue_name, mirror_queue_name)
+
+    # Check if we have rpc specific config, if not fall back to :astarte_vmq_plugin :amqp_options)
+    astarte_rpc_amqp_opts =
+      case Application.fetch_env(:astarte_rpc, :amqp_connection) do
+        {:ok, charlist_amqp_opts} ->
+          normalize_opts_strings(charlist_amqp_opts)
+
+        :error ->
+          amqp_opts
+      end
+
+    Application.put_env(:astarte_rpc, :amqp_connection, astarte_rpc_amqp_opts)
   end
 
   @doc """
@@ -70,11 +82,16 @@ defmodule Astarte.VMQ.Plugin.Config do
     Application.get_env(:astarte_vmq_plugin, :mirror_queue_name)
   end
 
+  def registry_mfa do
+    Application.get_env(:astarte_vmq_plugin, :registry_mfa)
+  end
+
   defp normalize_opts_strings(amqp_options) do
     Enum.map(amqp_options, fn
       {:username, value} -> {:username, to_string(value)}
       {:password, value} -> {:password, to_string(value)}
       {:virtual_host, value} -> {:virtual_host, to_string(value)}
+      {:host, value} -> {:host, to_string(value)}
       other -> other
     end)
   end
