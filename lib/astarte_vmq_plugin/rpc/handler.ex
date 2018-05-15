@@ -21,6 +21,7 @@ defmodule Astarte.VMQ.Plugin.RPC.Handler do
 
   alias Astarte.RPC.Protocol.VMQ.Plugin.{
     Call,
+    Disconnect,
     GenericErrorReply,
     GenericOkReply,
     Publish,
@@ -43,6 +44,25 @@ defmodule Astarte.VMQ.Plugin.RPC.Handler do
 
   defp extract_call_tuple(%Call{call: call_tuple}) do
     {:ok, call_tuple}
+  end
+
+  defp call_rpc({:disconnect, %Disconnect{client_id: nil}}) do
+    Logger.warn("Disconnect with nil client_id")
+    generic_error(:client_id_is_nil, "client_id is nil")
+  end
+
+  defp call_rpc({:disconnect, %Disconnect{discard_state: nil}}) do
+    Logger.warn("Disconnect with nil discard_state")
+    generic_error(:discard_state_is_nil, "discard_state is nil")
+  end
+
+  defp call_rpc({:disconnect, %Disconnect{client_id: client_id, discard_state: discard_state}}) do
+    # TODO: implement disconnect
+    Logger.log(
+      "Disconnect client_id: #{inspect(client_id)} discard_state: #{inspect(discard_state)}"
+    )
+
+    generic_ok()
   end
 
   defp call_rpc({:publish, %Publish{topic_tokens: []}}) do
