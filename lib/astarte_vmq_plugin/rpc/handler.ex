@@ -27,6 +27,7 @@ defmodule Astarte.VMQ.Plugin.RPC.Handler do
     Publish,
     Reply
   }
+
   alias Astarte.VMQ.Plugin.Publisher
 
   require Logger
@@ -87,11 +88,11 @@ defmodule Astarte.VMQ.Plugin.RPC.Handler do
         generic_ok()
 
       {:error, reason} ->
-        Logger.warn("Publish failed with reason: #{inspect reason}")
+        Logger.warn("Publish failed with reason: #{inspect(reason)}")
         generic_error(reason)
 
       other_err ->
-        Logger.warn("Unknown error in publish: #{inspect other_err}")
+        Logger.warn("Unknown error in publish: #{inspect(other_err)}")
         generic_error(:publish_error, "error during publish")
     end
   end
