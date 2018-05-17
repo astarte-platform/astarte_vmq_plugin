@@ -59,7 +59,7 @@ defmodule Astarte.VMQ.Plugin.RPC.Handler do
 
   defp call_rpc({:disconnect, %Disconnect{client_id: client_id, discard_state: discard_state}}) do
     # TODO: implement disconnect
-    Logger.log(
+    Logger.info(
       "Disconnect client_id: #{inspect(client_id)} discard_state: #{inspect(discard_state)}"
     )
 
