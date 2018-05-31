@@ -29,6 +29,7 @@ defmodule Astarte.VMQ.Plugin.RPC.Handler do
   }
 
   alias Astarte.VMQ.Plugin.Publisher
+  alias Astarte.VMQ.Plugin
 
   require Logger
 
@@ -58,12 +59,13 @@ defmodule Astarte.VMQ.Plugin.RPC.Handler do
   end
 
   defp call_rpc({:disconnect, %Disconnect{client_id: client_id, discard_state: discard_state}}) do
-    # TODO: implement disconnect
-    Logger.info(
-      "Disconnect client_id: #{inspect(client_id)} discard_state: #{inspect(discard_state)}"
-    )
+    case Plugin.disconnect_client(client_id, discard_state) do
+      :ok ->
+        generic_ok()
 
-    generic_ok()
+      {:error, reason} ->
+        generic_error(reason)
+    end
   end
 
   defp call_rpc({:publish, %Publish{topic_tokens: []}}) do
