@@ -89,6 +89,26 @@ defmodule Astarte.VMQ.Plugin do
     end
   end
 
+  def disconnect_client(client_id, discard_state) do
+    opts =
+      if discard_state do
+        [:do_cleanup]
+      else
+        []
+      end
+
+    mountpoint = ''
+    subscriber_id = {mountpoint, client_id}
+
+    case :vernemq_dev_api.disconnect_by_subscriber_id(subscriber_id, opts) do
+      :ok ->
+        :ok
+
+      :not_found ->
+        {:error, :not_found}
+    end
+  end
+
   def on_client_gone({_mountpoint, client_id}) do
     publish_event(client_id, "disconnection", now_us_x10_timestamp())
   end
