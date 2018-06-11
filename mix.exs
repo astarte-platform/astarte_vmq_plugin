@@ -75,6 +75,7 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
   defp deps do
     [
       {:amqp, "~> 1.0"},
+      {:vernemq_dev, github: "erlio/vernemq_dev"},
       {:excoveralls, "~> 0.7", only: :test},
       {:distillery, "~> 1.5", runtime: false}
     ]
