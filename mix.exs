@@ -74,10 +74,11 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:amqp, "~> 1.0"},
+      {:amqp, "== 1.0.2"},
+      {:ranch, "== 1.4.0", override: true},
       {:vernemq_dev, github: "erlio/vernemq_dev"},
-      {:excoveralls, "~> 0.7", only: :test},
-      {:distillery, "~> 1.5", runtime: false}
+      {:distillery, "== 1.5.2", runtime: false},
+      {:excoveralls, "~> 0.7", only: :test}
     ]
   end
 end
