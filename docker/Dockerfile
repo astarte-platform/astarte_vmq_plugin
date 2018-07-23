@@ -1,5 +1,5 @@
 # Build with Elixir 1.5/OTP 20
-FROM elixir:1.5-slim as builder
+FROM elixir:1.6.5-slim as builder
 
 RUN apt-get -qq update && apt-get -qq install git build-essential libssl-dev curl
 
@@ -10,10 +10,10 @@ RUN mix local.hex --force && \
 WORKDIR /build
 ENV MIX_ENV prod
 
-# Let's start by building VerneMQ 1.2.3
+# Let's start by building VerneMQ 1.4.1
 RUN git clone https://github.com/erlio/vernemq.git && \
 		cd vernemq && \
-		git checkout 1.2.3 && \
+		git checkout 1.4.1 && \
 		make rel && \
 		cd ..
 
