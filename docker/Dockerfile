@@ -1,5 +1,5 @@
 # Build with Elixir 1.5/OTP 20
-FROM elixir:1.5-slim as builder
+FROM elixir:1.6.5-slim as builder
 
 RUN apt-get -qq update && apt-get -qq install git build-essential libssl-dev curl
 
