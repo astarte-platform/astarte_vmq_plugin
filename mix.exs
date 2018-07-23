@@ -78,7 +78,7 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
       {:ranch, "== 1.4.0", override: true},
       {:vernemq_dev, github: "erlio/vernemq_dev"},
       {:distillery, "== 1.5.2", runtime: false},
-      {:excoveralls, "~> 0.7", only: :test}
+      {:excoveralls, "== 0.9.1", only: :test}
     ]
   end
 end
