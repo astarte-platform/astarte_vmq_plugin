@@ -188,7 +188,7 @@ defmodule Astarte.VMQ.Plugin do
 
     message_id = generate_message_id(realm, device_id, timestamp)
 
-    AMQPClient.publish(payload, headers: headers, message_id: message_id, timestamp: timestamp)
+    :ok = AMQPClient.publish(payload, headers: headers, message_id: message_id, timestamp: timestamp)
   end
 
   defp now_us_x10_timestamp do
