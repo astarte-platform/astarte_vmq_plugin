@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2017 Ispirata Srl
+# Copyright (C) 2017-2018 Ispirata Srl
 #
 # This file is part of Astarte.
 # Astarte is free software: you can redistribute it and/or modify
@@ -40,12 +40,22 @@ defmodule Astarte.VMQ.Plugin.AMQPClient do
   # Server callbacks
 
   def init(_args) do
-    rabbitmq_connect(false)
+    send(self(), :try_to_connect)
+    {:ok, :not_connected}
   end
 
-  def terminate(_reason, %Channel{conn: conn} = chan) do
+  def terminate(reason, %Channel{conn: conn} = chan) do
+    Logger.warn("AMQPClient terminated with reason #{inspect(reason)}")
     Channel.close(chan)
     Connection.close(conn)
+  end
+
+  def terminate(reason, _state) do
+    Logger.warn("AMQPClient terminated with reason #{inspect(reason)}")
+  end
+
+  def handle_call({:publish, _payload, _opts}, _from, :not_connected = state) do
+    {:reply, {:error, :not_connected}, state}
   end
 
   def handle_call({:publish, payload, opts}, _from, chan) do
@@ -64,41 +74,46 @@ defmodule Astarte.VMQ.Plugin.AMQPClient do
     {:reply, res, chan}
   end
 
-  def handle_info({:try_to_connect}, _state) do
-    {:ok, new_state} = rabbitmq_connect()
-    {:noreply, new_state}
+  def handle_info(:try_to_connect, _state) do
+    with {:ok, channel} <- connect() do
+      {:noreply, channel}
+    else
+      {:error, :not_connected} ->
+        {:noreply, :not_connected}
+    end
   end
 
   def handle_info({:DOWN, _, :process, _pid, reason}, _state) do
     Logger.warn("RabbitMQ connection lost: #{inspect(reason)}. Trying to reconnect...")
-    {:ok, new_state} = rabbitmq_connect()
-    {:noreply, new_state}
+    with {:ok, channel} <- connect() do
+      {:noreply, channel}
+    else
+      {:error, :not_connected} ->
+        {:noreply, :not_connected}
+    end
   end
 
-  defp rabbitmq_connect(retry \\ true) do
+  defp connect do
     with {:ok, conn} <- Connection.open(Config.amqp_options()),
          # Get notifications when the connection goes down
-         Process.monitor(conn.pid),
-         {:ok, chan} <- Channel.open(conn) do
+         {:ok, chan} <- Channel.open(conn),
+         Process.monitor(conn.pid) do
       {:ok, chan}
     else
       {:error, reason} ->
         Logger.warn("RabbitMQ Connection error: " <> inspect(reason))
-        maybe_retry(retry)
+        retry_connection_after(@connection_backoff)
+        {:error, :not_connected}
 
       :error ->
         Logger.warn("Unknown RabbitMQ connection error")
-        maybe_retry(retry)
+        retry_connection_after(@connection_backoff)
+        {:error, :not_connected}
     end
   end
 
-  defp maybe_retry(retry) do
-    if retry do
-      Logger.warn("Retrying connection in #{@connection_backoff} ms")
-      :erlang.send_after(@connection_backoff, :erlang.self(), {:try_to_connect})
-      {:ok, :not_connected}
-    else
-      {:stop, :connection_failed}
-    end
+  defp retry_connection_after(backoff) do
+    Logger.warn("Retrying connection in #{backoff} ms")
+    Process.send_after(self(), :try_to_connect, backoff)
   end
 end
