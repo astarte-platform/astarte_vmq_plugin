@@ -1,7 +1,7 @@
 Astarte VerneMQ Plugin
 ======================
 
-<img src="appengine_astarte_overview.svg" align="center" />
+<img src="vmq_plugin_astarte_overview.svg" align="center" />
 
 Astarte platform plugin for [VerneMQ](https://vernemq.com/).
 
