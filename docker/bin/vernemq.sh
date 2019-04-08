@@ -80,6 +80,9 @@ EOF
     echo "erlang.distribution.port_range.minimum = 9100" >> /opt/vernemq/etc/vernemq.conf
     echo "erlang.distribution.port_range.maximum = 9109" >> /opt/vernemq/etc/vernemq.conf
     echo "listener.tcp.default = ${IP_ADDRESS}:1883" >> /opt/vernemq/etc/vernemq.conf
+    if env | grep -q "VERNEMQ_ENABLE_SSL_LISTENER"; then
+        echo "listener.ssl.default = ${IP_ADDRESS}:8883" >> /opt/vernemq/etc/vernemq.conf
+    fi
     # We enable the revproxy listener regardless.
     echo "listener.tcp.revproxy = ${IP_ADDRESS}:1885" >> /opt/vernemq/etc/vernemq.conf
     echo "listener.ws.default = ${IP_ADDRESS}:8080" >> /opt/vernemq/etc/vernemq.conf
@@ -96,6 +99,49 @@ if [ $? -ne 1 ]; then
     echo "configuration error, exit"
     echo "$(cat /tmp/config.out)"
     exit $?
+fi
+
+if env | grep -q "VERNEMQ_ENABLE_SSL_LISTENER"; then
+    # Let's do our magic. First of all, let's ask for certificates.
+    if ! curl -s -d '{"label": "primary"}' -X POST $CFSSL_URL/api/v1/cfssl/info | jq -e -r ".result.certificate" > /etc/ssl/cfssl-ca-cert.crt; then
+        echo "Could not retrieve certificate from CFSSL at $CFSSL_URL , exiting"
+        exit $?
+    fi
+    if env | grep -q "USE_LETSENCRYPT"; then
+        # TODO: Make this rotate in case we're using Let's encrypt
+        echo "You have chosen Let's encrypt as the deploy mechanism - this means clustering Verne is impossible!"
+        # Ensure certbot, first of all
+        echo 'deb http://ftp.debian.org/debian jessie-backports main' | tee /etc/apt/sources.list.d/backports.list
+        apt-get update
+        apt-get -qq install nginx-light
+        /etc/init.d/nginx start
+        if ! apt-get -qq install certbot -t jessie-backports; then
+            echo "Could not install certbot, exiting"
+            exit $?
+        fi
+        # Obtain certificate
+        if env | grep -q "LETSENCRYPT_STAGING"; then
+            echo "Using staging Let's Encrypt - certificate won't be valid!"
+            certbot_staging=--test-cert
+        fi
+        if ! certbot certonly -n $certbot_staging --webroot --webroot-path=/var/www/html --agree-tos --email $LETSENCRYPT_EMAIL --domains $LETSENCRYPT_DOMAINS; then
+            echo "Certbot failed, exiting"
+            exit $?
+        fi
+        /etc/init.d/nginx stop &
+        letsencrypt_dir=/etc/letsencrypt/live/${LETSENCRYPT_DOMAINS%,*}
+        # Then we copy our private key and certificate.
+        cp $letsencrypt_dir/privkey.pem /opt/vernemq/etc/privkey.pem || exit 1
+        cp $letsencrypt_dir/fullchain.pem /opt/vernemq/etc/cert.pem || exit 1
+        # And now we merge.
+        cat $letsencrypt_dir/fullchain.pem /etc/ssl/cfssl-ca-cert.crt > /opt/vernemq/etc/ca.pem
+    else
+        # Then we copy our private key and certificate. We assume there's a mount at /etc/ssl/vernemq-certs
+        cp /etc/ssl/vernemq-certs/privkey /opt/vernemq/etc/privkey.pem || exit 1
+        cp /etc/ssl/vernemq-certs/cert /opt/vernemq/etc/cert.pem || exit 1
+        # And now we merge.
+        cat /etc/ssl/vernemq-certs/cert /etc/ssl/cfssl-ca-cert.crt > /opt/vernemq/etc/ca.pem
+    fi
 fi
 
 pid=0
