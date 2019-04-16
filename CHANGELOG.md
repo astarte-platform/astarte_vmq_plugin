@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.10.0] - 2019-04-16
+
 ## [0.10.0-rc.1] - 2019-04-10
 ### Fixed
 - Re-enable SSL listener, which broke Docker Compose.
