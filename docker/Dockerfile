@@ -17,7 +17,7 @@ RUN git clone --branch 1.5.0 https://github.com/erlio/vernemq.git && \
 		cd ..
 
 # Time for VerneMQ's Astarte plugin
-RUN git clone https://github.com/astarte-platform/astarte_vmq_plugin.git && \
+RUN git clone --branch v0.10.0 https://github.com/astarte-platform/astarte_vmq_plugin.git && \
 		cd astarte_vmq_plugin && \
 		mix deps.get && \
 		mix release --env=$MIX_ENV && \
