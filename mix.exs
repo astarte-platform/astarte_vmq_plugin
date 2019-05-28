@@ -23,7 +23,7 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
     [
       app: :astarte_vmq_plugin,
       version: "0.11.0-dev",
-      elixir: "~> 1.5",
+      elixir: "~> 1.8",
       elixirc_paths: elixirc_paths(Mix.env),
       start_permanent: Mix.env() == :prod,
       test_coverage: [tool: ExCoveralls],
@@ -40,7 +40,7 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger, :amqp],
+      extra_applications: [:lager, :logger, :amqp],
       mod: {Astarte.VMQ.Plugin.Application, []},
       env: [
         vmq_plugin_hooks: [
@@ -74,11 +74,11 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:amqp, "== 1.0.2"},
-      {:ranch, "== 1.4.0", override: true},
+      {:amqp, "~> 1.0"},
+      {:ranch, "== 1.7.1", override: true},
       {:vernemq_dev, github: "erlio/vernemq_dev"},
-      {:distillery, "== 1.5.2", runtime: false},
-      {:excoveralls, "== 0.9.1", only: :test}
+      {:distillery, "~> 1.5", runtime: false},
+      {:excoveralls, "~> 0.11", only: :test}
     ]
   end
 end
