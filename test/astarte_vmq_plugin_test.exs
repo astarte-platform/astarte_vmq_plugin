@@ -464,7 +464,7 @@ defmodule Astarte.VMQ.PluginTest do
 
   defp now_us_x10_timestamp do
     DateTime.utc_now()
-    |> DateTime.to_unix(:microseconds)
+    |> DateTime.to_unix(:microsecond)
     |> Kernel.*(10)
   end
 
