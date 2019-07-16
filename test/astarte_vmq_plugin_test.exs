@@ -254,7 +254,8 @@ defmodule Astarte.VMQ.PluginTest do
 
     Plugin.on_register({ip_addr, :dontcare}, {:dontcare, @device_base_path}, :dontcare)
 
-    assert_receive {:amqp_msg, "", %{headers: headers, timestamp: timestamp, message_id: message_id} = _metadata}
+    assert_receive {:amqp_msg, "",
+                    %{headers: headers, timestamp: timestamp, message_id: message_id} = _metadata}
 
     # 5 seconds
     assert_in_delta timestamp, now_us_x10_timestamp(), 50_000_000
@@ -273,7 +274,8 @@ defmodule Astarte.VMQ.PluginTest do
   test "device on_client_gone" do
     Plugin.on_client_gone({:dontcare, @device_base_path})
 
-    assert_receive {:amqp_msg, "", %{headers: headers, timestamp: timestamp, message_id: message_id} = _metadata}
+    assert_receive {:amqp_msg, "",
+                    %{headers: headers, timestamp: timestamp, message_id: message_id} = _metadata}
 
     # 5 seconds
     assert_in_delta timestamp, now_us_x10_timestamp(), 50_000_000
@@ -291,7 +293,8 @@ defmodule Astarte.VMQ.PluginTest do
   test "device on_client_offline" do
     Plugin.on_client_offline({:dontcare, @device_base_path})
 
-    assert_receive {:amqp_msg, "", %{headers: headers, timestamp: timestamp, message_id: message_id} = _metadata}
+    assert_receive {:amqp_msg, "",
+                    %{headers: headers, timestamp: timestamp, message_id: message_id} = _metadata}
 
     # 5 seconds
     assert_in_delta timestamp, now_us_x10_timestamp(), 50_000_000
@@ -319,7 +322,8 @@ defmodule Astarte.VMQ.PluginTest do
       :dontcare
     )
 
-    assert_receive {:amqp_msg, ^payload, %{headers: headers, timestamp: timestamp, message_id: message_id} = _metadata}
+    assert_receive {:amqp_msg, ^payload,
+                    %{headers: headers, timestamp: timestamp, message_id: message_id} = _metadata}
 
     # 5 seconds
     assert_in_delta timestamp, now_us_x10_timestamp(), 50_000_000
@@ -348,7 +352,8 @@ defmodule Astarte.VMQ.PluginTest do
       :dontcare
     )
 
-    assert_receive {:amqp_msg, ^payload, %{headers: headers, timestamp: timestamp, message_id: message_id} = _metadata}
+    assert_receive {:amqp_msg, ^payload,
+                    %{headers: headers, timestamp: timestamp, message_id: message_id} = _metadata}
 
     # 5 seconds
     assert_in_delta timestamp, now_us_x10_timestamp(), 50_000_000
@@ -379,7 +384,8 @@ defmodule Astarte.VMQ.PluginTest do
       :dontcare
     )
 
-    assert_receive {:amqp_msg, ^payload, %{headers: headers, timestamp: timestamp, message_id: message_id} = _metadata}
+    assert_receive {:amqp_msg, ^payload,
+                    %{headers: headers, timestamp: timestamp, message_id: message_id} = _metadata}
 
     # 5 seconds
     assert_in_delta timestamp, now_us_x10_timestamp(), 50_000_000

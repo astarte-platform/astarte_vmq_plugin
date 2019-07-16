@@ -23,4 +23,4 @@ use Mix.Config
 config :lager,
   handlers: [level: :critical]
 
-import_config "#{Mix.env}.exs"
+import_config "#{Mix.env()}.exs"

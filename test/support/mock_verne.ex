@@ -7,6 +7,7 @@ defmodule Astarte.VMQ.Plugin.MockVerne do
   # ones returned from :vmq_reg.direct_plugin_exports
   def get_functions do
     empty_fun = fn -> :ok end
+
     publish_fun = fn topic, payload, opts ->
       Agent.update(__MODULE__, &:queue.in({topic, payload, opts}, &1))
     end

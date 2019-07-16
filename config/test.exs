@@ -27,11 +27,8 @@ config :lager,
 # make amqp supervisors logs less verbose
 config :logger, handle_otp_reports: false
 
-config :astarte_vmq_plugin, :amqp_options,
-  host: "rabbitmq"
+config :astarte_vmq_plugin, :amqp_options, host: "rabbitmq"
 
-config :astarte_vmq_plugin, :queue_name,
-  "test_queue"
+config :astarte_vmq_plugin, :queue_name, "test_queue"
 
-config :astarte_vmq_plugin, :registry_mfa,
-  {Astarte.VMQ.Plugin.MockVerne, :get_functions, []}
+config :astarte_vmq_plugin, :registry_mfa, {Astarte.VMQ.Plugin.MockVerne, :get_functions, []}

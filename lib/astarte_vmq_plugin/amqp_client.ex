@@ -85,6 +85,7 @@ defmodule Astarte.VMQ.Plugin.AMQPClient do
 
   def handle_info({:DOWN, _, :process, _pid, reason}, _state) do
     Logger.warn("RabbitMQ connection lost: #{inspect(reason)}. Trying to reconnect...")
+
     with {:ok, channel} <- connect() do
       {:noreply, channel}
     else

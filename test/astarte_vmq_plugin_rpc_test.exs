@@ -26,6 +26,7 @@ defmodule Astarte.VMQ.Plugin.RPCTest do
     Publish,
     Reply
   }
+
   alias Astarte.VMQ.Plugin.MockVerne
   alias Astarte.VMQ.Plugin.RPC.Handler
 
@@ -46,7 +47,7 @@ defmodule Astarte.VMQ.Plugin.RPCTest do
           %Publish{
             topic_tokens: [],
             payload: @payload,
-            qos: 2,
+            qos: 2
           }
         }
       }
@@ -55,11 +56,11 @@ defmodule Astarte.VMQ.Plugin.RPCTest do
     assert {:ok, ser_reply} = Handler.handle_rpc(serialized_call)
 
     assert %Reply{
-      reply: {
-        :generic_error_reply,
-        %GenericErrorReply{error_name: "empty_topic_tokens"}
-      }
-    } = Reply.decode(ser_reply)
+             reply: {
+               :generic_error_reply,
+               %GenericErrorReply{error_name: "empty_topic_tokens"}
+             }
+           } = Reply.decode(ser_reply)
 
     assert MockVerne.consume_message() == nil
   end
@@ -72,7 +73,7 @@ defmodule Astarte.VMQ.Plugin.RPCTest do
           %Publish{
             topic_tokens: @topic,
             payload: nil,
-            qos: 2,
+            qos: 2
           }
         }
       }
@@ -81,11 +82,11 @@ defmodule Astarte.VMQ.Plugin.RPCTest do
     assert {:ok, ser_reply} = Handler.handle_rpc(serialized_call)
 
     assert %Reply{
-      reply: {
-        :generic_error_reply,
-        %GenericErrorReply{error_name: "payload_is_nil"}
-      }
-    } = Reply.decode(ser_reply)
+             reply: {
+               :generic_error_reply,
+               %GenericErrorReply{error_name: "payload_is_nil"}
+             }
+           } = Reply.decode(ser_reply)
 
     assert MockVerne.consume_message() == nil
   end
@@ -98,7 +99,7 @@ defmodule Astarte.VMQ.Plugin.RPCTest do
           %Publish{
             topic_tokens: @topic,
             payload: @payload,
-            qos: 42,
+            qos: 42
           }
         }
       }
@@ -107,11 +108,11 @@ defmodule Astarte.VMQ.Plugin.RPCTest do
     assert {:ok, ser_reply} = Handler.handle_rpc(serialized_call)
 
     assert %Reply{
-      reply: {
-        :generic_error_reply,
-        %GenericErrorReply{error_name: "invalid_qos"}
-      }
-    } = Reply.decode(ser_reply)
+             reply: {
+               :generic_error_reply,
+               %GenericErrorReply{error_name: "invalid_qos"}
+             }
+           } = Reply.decode(ser_reply)
 
     assert MockVerne.consume_message() == nil
   end
@@ -124,7 +125,7 @@ defmodule Astarte.VMQ.Plugin.RPCTest do
           %Publish{
             topic_tokens: @topic,
             payload: @payload,
-            qos: 2,
+            qos: 2
           }
         }
       }
@@ -133,11 +134,11 @@ defmodule Astarte.VMQ.Plugin.RPCTest do
     assert {:ok, ser_reply} = Handler.handle_rpc(serialized_call)
 
     assert %Reply{
-      reply: {
-        :generic_ok_reply,
-        %GenericOkReply{}
-      }
-    } = Reply.decode(ser_reply)
+             reply: {
+               :generic_ok_reply,
+               %GenericOkReply{}
+             }
+           } = Reply.decode(ser_reply)
 
     assert MockVerne.consume_message() == {@topic, @payload, %{qos: 2}}
   end
