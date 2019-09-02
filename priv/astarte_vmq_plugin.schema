@@ -43,10 +43,16 @@
     {datatype, {enum, [true, false]}}
   ]}.
 
-{mapping, "astarte_vmq_plugin.amqp.queue_name", "astarte_vmq_plugin.queue_name",
+{mapping, "astarte_vmq_plugin.amqp.data_queue_prefix", "astarte_vmq_plugin.data_queue_prefix",
   [
-    {default, "vmq_all"},
+    {default, "astarte_data_"},
     {datatype, string}
+  ]}.
+
+{mapping, "astarte_vmq_plugin.amqp.data_queue_count", "astarte_vmq_plugin.data_queue_count",
+  [
+    {default, 1},
+    {datatype, integer}
   ]}.
 
 {mapping, "astarte_vmq_plugin.amqp.mirror_queue_name", "astarte_vmq_plugin.mirror_queue_name",

@@ -39,18 +39,18 @@ defmodule Astarte.VMQ.Plugin.ConfigTest do
     end)
   end
 
-  test "config init correctly converts queue_name to elixir string" do
-    queue_name = 'test_erlang_str'
+  test "config init correctly converts data_queue_prefix to elixir string" do
+    data_queue_prefix = 'test_erlang_str'
 
-    old_queue_name = Config.queue_name()
+    old_data_queue_prefix = Config.data_queue_prefix()
 
-    Application.put_env(:astarte_vmq_plugin, :queue_name, queue_name)
+    Application.put_env(:astarte_vmq_plugin, :data_queue_prefix, data_queue_prefix)
     Config.init()
 
-    assert Config.queue_name() == to_string(queue_name)
+    assert Config.data_queue_prefix() == to_string(data_queue_prefix)
 
     on_exit(fn ->
-      Application.put_env(:astarte_vmq_plugin, :amqp_options, old_queue_name)
+      Application.put_env(:astarte_vmq_plugin, :data_queue_prefix, old_data_queue_prefix)
     end)
   end
 end

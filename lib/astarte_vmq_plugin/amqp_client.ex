@@ -59,13 +59,19 @@ defmodule Astarte.VMQ.Plugin.AMQPClient do
   end
 
   def handle_call({:publish, payload, opts}, _from, chan) do
+    sharding_key = Keyword.fetch!(opts, :sharding_key)
+
     # TODO: handle basic.return
     full_opts =
       opts
+      |> Keyword.delete(:sharding_key)
       |> Keyword.put(:persistent, true)
       |> Keyword.put(:mandatory, true)
 
-    res = Basic.publish(chan, "", Config.queue_name(), payload, full_opts)
+    queue_prefix = Config.data_queue_prefix()
+    queue_index = :erlang.phash2(sharding_key, Config.data_queue_count())
+    queue_name = "#{queue_prefix}#{queue_index}"
+    res = Basic.publish(chan, "", queue_name, payload, full_opts)
 
     if Config.mirror_queue_name() do
       Basic.publish(chan, "", Config.mirror_queue_name(), payload, full_opts)

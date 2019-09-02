@@ -187,9 +187,15 @@ defmodule Astarte.VMQ.Plugin do
       ] ++ additional_headers
 
     message_id = generate_message_id(realm, device_id, timestamp)
+    sharding_key = {realm, device_id}
 
     :ok =
-      AMQPClient.publish(payload, headers: headers, message_id: message_id, timestamp: timestamp)
+      AMQPClient.publish(payload,
+        headers: headers,
+        message_id: message_id,
+        timestamp: timestamp,
+        sharding_key: sharding_key
+      )
   end
 
   defp now_us_x10_timestamp do

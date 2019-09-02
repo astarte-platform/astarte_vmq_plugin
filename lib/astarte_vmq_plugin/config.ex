@@ -34,11 +34,11 @@ defmodule Astarte.VMQ.Plugin.Config do
 
     Application.put_env(:astarte_vmq_plugin, :amqp_options, amqp_opts)
 
-    queue_name =
-      Application.get_env(:astarte_vmq_plugin, :queue_name, "vmq_all")
+    data_queue_prefix =
+      Application.get_env(:astarte_vmq_plugin, :data_queue_prefix, "astarte_data_")
       |> to_string()
 
-    Application.put_env(:astarte_vmq_plugin, :queue_name, queue_name)
+    Application.put_env(:astarte_vmq_plugin, :data_queue_prefix, data_queue_prefix)
 
     mirror_queue_name =
       case Application.fetch_env(:astarte_vmq_plugin, :mirror_queue_name) do
@@ -72,10 +72,19 @@ defmodule Astarte.VMQ.Plugin.Config do
   end
 
   @doc """
-  Returns the name of the queue used by Data Updater Plant
+  Returns the prefix for the AMQP data queues. This is concatenated with
+  the queue index to obtain the name of the queue. The range of indexes
+  is 0..(data_queue_count - 1)
   """
-  def queue_name do
-    Application.get_env(:astarte_vmq_plugin, :queue_name)
+  def data_queue_prefix do
+    Application.get_env(:astarte_vmq_plugin, :data_queue_prefix)
+  end
+
+  @doc """
+  Returns the number of data queues used for consistent hashing. Defaults to 1.
+  """
+  def data_queue_count do
+    Application.get_env(:astarte_vmq_plugin, :data_queue_count, 1)
   end
 
   def mirror_queue_name do

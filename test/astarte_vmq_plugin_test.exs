@@ -29,12 +29,13 @@ defmodule Astarte.VMQ.PluginTest do
   @realm "test"
   @device_base_path "#{@realm}/#{@device_id}"
   @other_mqtt_user "other"
+  @queue_name "#{Config.data_queue_prefix()}0"
 
   setup_all do
     amqp_opts = Config.amqp_options()
     {:ok, conn} = Connection.open(amqp_opts)
     {:ok, chan} = Channel.open(conn)
-    Queue.declare(chan, Config.queue_name())
+    Queue.declare(chan, @queue_name)
     {:ok, chan: chan}
   end
 
@@ -42,7 +43,7 @@ defmodule Astarte.VMQ.PluginTest do
     test_pid = self()
 
     {:ok, consumer_tag} =
-      Queue.subscribe(chan, Config.queue_name(), fn payload, meta ->
+      Queue.subscribe(chan, @queue_name, fn payload, meta ->
         send(test_pid, {:amqp_msg, payload, meta})
       end)
 
