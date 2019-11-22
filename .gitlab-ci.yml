@@ -1,65 +1,51 @@
 stages:
-    - build
+    - test
     - deploy
-
-before_script:
-    - mix local.hex --force
-    - mix local.rebar
 
 variables:
     APPLICATION_NAME: astarte_vmq_plugin
 
-mix:test-ci:
-    image: elixir:1.6
+mix:test-coverage:
+    stage: test
+    image: elixir:1.6.5
     services:
-        - rabbitmq:3.6
-    stage: build
-    script:
-        - export MIX_ENV=test
-        - mix deps.get
-        - mix deps.compile
-        - mix compile
-        - mix coveralls
+        - rabbitmq:3.7.15
     cache:
+        key: "$CI_COMMIT_REF_SLUG"
         paths:
             - deps
-    except:
+            - _build
+    before_script:
+        - mix local.hex --force
+        - mix local.rebar
+        - mix deps.get
+    script:
+        - mix coveralls
+
+docker:test-container:
+    stage: test
+    image: docker:latest
+    only:
+        - merge_requests
+    services:
+        - docker:stable-dind
+    before_script:
+        - docker info
+        - cd docker/
+    script:
+        - docker build -t $CI_REGISTRY/astarte-ng/astarte_vmq_plugin/vernemq:testing .
+
+docker:snapshot-prod-container:
+    stage: deploy
+    image: docker:latest
+    only:
         - branches@Astarte-NG/astarte_vmq_plugin
-
-mix:build:
-    image: elixir:1.6
     services:
-        - rabbitmq:3.6
-    stage: build
+        - docker:stable-dind
+    before_script:
+        - docker info
+        - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
     script:
-        - export MIX_ENV=test
-        - mix deps.get
-        - mix deps.compile
-        - mix compile
-        - mix coveralls
-        - export MIX_ENV=dev
-        - mix release
-    cache:
-        paths:
-            - deps
-    only:
-        - master@Astarte-NG/astarte_vmq_plugin
-
-mix:release-build:
-    image: elixir:1.6
-    services:
-        - rabbitmq:3.6
-    stage: build
-    script:
-        - export MIX_ENV=test
-        - mix deps.get
-        - mix deps.compile
-        - mix compile
-        - mix coveralls
-        - export MIX_ENV=prod
-        - mix release
-    cache:
-        paths:
-            - deps
-    only:
-        - tags@Astarte-NG/astarte_vmq_plugin
+        - export IMAGE_TAG=$([[ $CI_COMMIT_REF_NAME == "master" ]] && echo "snapshot" || echo $CI_COMMIT_REF_NAME | sed 's/release-\(.*\)/\1-snapshot/g')
+        - docker build -t $CI_REGISTRY/astarte-ng/astarte_vmq_plugin/vernemq:$IMAGE_TAG .
+        - docker push $CI_REGISTRY/astarte-ng/astarte_vmq_plugin/vernemq:$IMAGE_TAG
