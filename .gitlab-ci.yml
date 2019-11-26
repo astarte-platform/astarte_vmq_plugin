@@ -45,6 +45,7 @@ docker:snapshot-prod-container:
     before_script:
         - docker info
         - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+        - cd docker/
     script:
         - export IMAGE_TAG=$([[ $CI_COMMIT_REF_NAME == "master" ]] && echo "snapshot" || echo $CI_COMMIT_REF_NAME | sed 's/release-\(.*\)/\1-snapshot/g')
         - docker build -t $CI_REGISTRY/astarte-ng/astarte_vmq_plugin/vernemq:$IMAGE_TAG .
