@@ -24,6 +24,8 @@ config :lager,
   error_logger_redirect: false,
   handlers: [level: :critical]
 
+config :astarte_vmq_plugin, :amqp_options, host: System.get_env("RABBITMQ_HOST") || "rabbitmq"
+
 # make amqp supervisors logs less verbose
 config :logger, handle_otp_reports: false
 
