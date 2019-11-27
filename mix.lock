@@ -23,5 +23,5 @@
   "recon": {:hex, :recon, "2.5.0", "2f7fcbec2c35034bade2f9717f77059dc54eb4e929a3049ca7ba6775c0bd66cd", [:mix, :rebar3], [], "hexpm"},
   "ssl_verify_fun": {:hex, :ssl_verify_fun, "1.1.4", "f0eafff810d2041e93f915ef59899c923f4568f4585904d010387ed74988e77b", [:make, :mix, :rebar3], [], "hexpm"},
   "unicode_util_compat": {:hex, :unicode_util_compat, "0.4.1", "d869e4c68901dd9531385bb0c8c40444ebf624e60b6962d95952775cac5e90cd", [:rebar3], [], "hexpm"},
-  "vernemq_dev": {:git, "https://github.com/erlio/vernemq_dev.git", "741655f532ad16bb501d01230c7fb68dbae523d2", []},
+  "vernemq_dev": {:git, "https://github.com/erlio/vernemq_dev.git", "741655f532ad16bb501d01230c7fb68dbae523d2", [ref: "741655f532ad16bb501d01230c7fb68dbae523d2"]},
 }
