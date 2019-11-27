@@ -33,6 +33,7 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
         "coveralls.post": :test,
         "coveralls.html": :test
       ],
+      dialyzer_cache_directory: dialyzer_cache_directory(Mix.env()),
       deps: deps() ++ astarte_required_modules(System.get_env("ASTARTE_IN_UMBRELLA"))
     ]
   end
@@ -59,6 +60,14 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
 
+  defp dialyzer_cache_directory(:ci) do
+    "dialyzer_cache"
+  end
+
+  defp dialyzer_cache_directory(_) do
+    nil
+  end
+
   defp astarte_required_modules("true") do
     [
       {:astarte_rpc, in_umbrella: true}
@@ -79,7 +88,8 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
       {:vernemq_dev,
        github: "erlio/vernemq_dev", ref: "741655f532ad16bb501d01230c7fb68dbae523d2"},
       {:distillery, "~> 1.5", runtime: false},
-      {:excoveralls, "~> 0.11", only: :test}
+      {:excoveralls, "~> 0.11", only: :test},
+      {:dialyzex, github: "Comcast/dialyzex", only: [:dev, :ci]}
     ]
   end
 end
