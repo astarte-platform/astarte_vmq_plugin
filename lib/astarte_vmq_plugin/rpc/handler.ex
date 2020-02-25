@@ -121,8 +121,18 @@ defmodule Astarte.VMQ.Plugin.RPC.Handler do
     |> ok_wrap
   end
 
+  defp encode_reply(%GenericOkReply{} = reply, _reply_type) do
+    %Reply{reply: {:generic_ok_reply, reply}, error: false}
+    |> Reply.encode()
+  end
+
+  defp encode_reply(%GenericErrorReply{} = reply, _reply_type) do
+    %Reply{reply: {:generic_error_reply, reply}, error: true}
+    |> Reply.encode()
+  end
+
   defp encode_reply(reply, reply_type) do
-    %Reply{reply: {reply_type, reply}}
+    %Reply{reply: {reply_type, reply}, error: false}
     |> Reply.encode()
   end
 
