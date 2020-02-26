@@ -1,0 +1,20 @@
+name: Test Container Builds
+
+on:
+  pull_request:
+    paths:
+    - '**/Dockerfile'
+    - '**/entrypoint.sh'
+    - '.github/pr-container-build-workflow.yaml'
+
+jobs:
+  test-build-container:
+    name: Test Container Build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Building Docker Image
+      working-directory: ./docker
+      env:
+        CONTAINER_IMAGE_NAME: gh_actions_test
+      run: docker build -t $CONTAINER_IMAGE_NAME:ci-test .
