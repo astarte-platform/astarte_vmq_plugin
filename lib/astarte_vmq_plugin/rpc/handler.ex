@@ -48,14 +48,14 @@ defmodule Astarte.VMQ.Plugin.RPC.Handler do
     {:ok, call_tuple}
   end
 
-  defp call_rpc({:disconnect, %Disconnect{client_id: nil}}) do
-    Logger.warn("Disconnect with nil client_id")
-    generic_error(:client_id_is_nil, "client_id is nil")
+  defp call_rpc({:disconnect, %Disconnect{client_id: ""}}) do
+    Logger.warn("Disconnect with empty client_id")
+    generic_error(:client_id_is_emtpy, "client_id is \"\"")
   end
 
-  defp call_rpc({:disconnect, %Disconnect{discard_state: nil}}) do
-    Logger.warn("Disconnect with nil discard_state")
-    generic_error(:discard_state_is_nil, "discard_state is nil")
+  defp call_rpc({:disconnect, %Disconnect{discard_state: ""}}) do
+    Logger.warn("Disconnect with empty discard_state")
+    generic_error(:discard_state_is_empty, "discard_state is \"\"")
   end
 
   defp call_rpc({:disconnect, %Disconnect{client_id: client_id, discard_state: discard_state}}) do
@@ -73,9 +73,9 @@ defmodule Astarte.VMQ.Plugin.RPC.Handler do
     generic_error(:empty_topic_tokens, "empty topic tokens")
   end
 
-  defp call_rpc({:publish, %Publish{payload: nil}}) do
-    Logger.warn("Publish with nil payload")
-    generic_error(:payload_is_nil, "payload is nil")
+  defp call_rpc({:publish, %Publish{payload: ""}}) do
+    Logger.warn("Publish with empty payload")
+    generic_error(:payload_is_empty, "payload is \"\"")
   end
 
   # This also handles the case of qos == nil, that is > 2
@@ -101,9 +101,9 @@ defmodule Astarte.VMQ.Plugin.RPC.Handler do
 
   defp generic_error(
          error_name,
-         user_readable_message \\ nil,
-         user_readable_error_name \\ nil,
-         error_data \\ nil
+         user_readable_message \\ "",
+         user_readable_error_name \\ "",
+         error_data \\ ""
        ) do
     %GenericErrorReply{
       error_name: to_string(error_name),
