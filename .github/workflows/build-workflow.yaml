@@ -73,8 +73,6 @@ jobs:
         - 15672:15672
     env:
       MIX_ENV: test
-      CASSANDRA_DB_HOST: localhost
-      ASTARTE_CASSANDRA_NODES: localhost
       RABBITMQ_HOST: localhost
     steps:
     - uses: actions/checkout@v2
