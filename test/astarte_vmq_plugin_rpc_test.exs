@@ -42,6 +42,7 @@ defmodule Astarte.VMQ.Plugin.RPCTest do
   test "invalid topic Publish call" do
     serialized_call =
       %Call{
+        version: 0,
         call: {
           :publish,
           %Publish{
@@ -56,6 +57,7 @@ defmodule Astarte.VMQ.Plugin.RPCTest do
     assert {:ok, ser_reply} = Handler.handle_rpc(serialized_call)
 
     assert %Reply{
+             version: 0,
              reply: {
                :generic_error_reply,
                %GenericErrorReply{error_name: "empty_topic_tokens"}
@@ -68,6 +70,7 @@ defmodule Astarte.VMQ.Plugin.RPCTest do
   test "invalid payload Publish call" do
     serialized_call =
       %Call{
+        version: 0,
         call: {
           :publish,
           %Publish{
@@ -82,9 +85,15 @@ defmodule Astarte.VMQ.Plugin.RPCTest do
     assert {:ok, ser_reply} = Handler.handle_rpc(serialized_call)
 
     assert %Reply{
+             version: 0,
              reply: {
                :generic_error_reply,
-               %GenericErrorReply{error_name: "payload_is_nil"}
+               %GenericErrorReply{
+                 error_name: "payload_is_empty",
+                 user_readable_error_name: "",
+                 user_readable_message: "payload is \"\"",
+                 error_data: ""
+               }
              }
            } = Reply.decode(ser_reply)
 
@@ -94,6 +103,7 @@ defmodule Astarte.VMQ.Plugin.RPCTest do
   test "invalid qos Publish call" do
     serialized_call =
       %Call{
+        version: 0,
         call: {
           :publish,
           %Publish{
@@ -108,6 +118,7 @@ defmodule Astarte.VMQ.Plugin.RPCTest do
     assert {:ok, ser_reply} = Handler.handle_rpc(serialized_call)
 
     assert %Reply{
+             version: 0,
              reply: {
                :generic_error_reply,
                %GenericErrorReply{error_name: "invalid_qos"}
@@ -120,6 +131,7 @@ defmodule Astarte.VMQ.Plugin.RPCTest do
   test "valid Publish call" do
     serialized_call =
       %Call{
+        version: 0,
         call: {
           :publish,
           %Publish{
@@ -134,6 +146,7 @@ defmodule Astarte.VMQ.Plugin.RPCTest do
     assert {:ok, ser_reply} = Handler.handle_rpc(serialized_call)
 
     assert %Reply{
+             version: 0,
              reply: {
                :generic_ok_reply,
                %GenericOkReply{}
