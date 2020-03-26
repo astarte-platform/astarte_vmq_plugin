@@ -22,7 +22,7 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
   def project do
     [
       app: :astarte_vmq_plugin,
-      version: "0.11.0-rc.0",
+      version: "0.11.0-rc.1",
       elixir: "~> 1.8",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
@@ -76,20 +76,23 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
 
   defp astarte_required_modules(_) do
     [
-      {:astarte_rpc, github: "astarte-platform/astarte_rpc", branch: "release-0.11"}
+      {:astarte_rpc, github: "astarte-platform/astarte_rpc", tag: "v0.11.0-rc.1"}
     ]
   end
 
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:amqp, "~> 1.0"},
+      {:amqp, "== 1.2.1"},
       {:ranch, "== 1.7.1", override: true},
       {:vernemq_dev,
        github: "erlio/vernemq_dev", ref: "741655f532ad16bb501d01230c7fb68dbae523d2"},
-      {:distillery, "~> 1.5", runtime: false},
-      {:excoveralls, "~> 0.11", only: :test},
-      {:dialyzex, github: "Comcast/dialyzex", only: [:dev, :ci]}
+      {:distillery, "== 1.5.5", runtime: false},
+      {:excoveralls, "== 0.11.1", only: :test},
+      {:dialyzex,
+       github: "Comcast/dialyzex",
+       ref: "cdc7cf71fe6df0ce4cf59e3f497579697a05c989",
+       only: [:dev, :ci]}
     ]
   end
 end
