@@ -30,19 +30,19 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-mix-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
           ${{ runner.os }}-mix-
-          ${{ runner.os }}-mix-
     - uses: actions/cache@v1
       with:
         path: _build
         key: ${{ runner.os }}-_build-${{ github.sha }}
         restore-keys: |
-          ${{ runner.os }}-_build-
+          ${{ runner.os }}-_build-${{ github.sha }}
           ${{ runner.os }}-_build-
     - uses: actions/cache@v1
       with:
         path: dialyzer_cache
         key: ${{ runner.os }}-dialyzer_cache-${{ github.sha }}
         restore-keys: |
+          ${{ runner.os }}-dialyzer_cache-${{ github.sha }}
           ${{ runner.os }}-dialyzer_cache-
     - uses: actions/setup-elixir@v1.2.0
       with:
@@ -73,8 +73,6 @@ jobs:
         - 15672:15672
     env:
       MIX_ENV: test
-      CASSANDRA_DB_HOST: localhost
-      ASTARTE_CASSANDRA_NODES: localhost
       RABBITMQ_HOST: localhost
     steps:
     - uses: actions/checkout@v2
@@ -90,6 +88,7 @@ jobs:
         path: _build
         key: ${{ runner.os }}-_build-${{ github.sha }}
         restore-keys: |
+          ${{ runner.os }}-_build-${{ github.sha }}
           ${{ runner.os }}-_build-
     - uses: actions/setup-elixir@v1.2.0
       with:
