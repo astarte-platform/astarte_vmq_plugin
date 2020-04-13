@@ -60,6 +60,11 @@
     {datatype, string}
   ]}.
 
+{mapping, "astarte_vmq_plugin.heartbeat_interval_ms", "astarte_vmq_plugin.heartbeat_interval_ms",
+  [
+    {datatype, integer}
+  ]}.
+
 {mapping, "astarte_rpc.amqp_connection.username", "astarte_rpc.amqp_connection_options.username", [
     {datatype, string}
   ]}.
