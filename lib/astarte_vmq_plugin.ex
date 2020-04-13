@@ -21,6 +21,7 @@ defmodule Astarte.VMQ.Plugin do
   Documentation for Astarte.VMQ.Plugin.
   """
 
+  alias Astarte.VMQ.Plugin.Config
   alias Astarte.VMQ.Plugin.AMQPClient
 
   @max_rand trunc(:math.pow(2, 32) - 1)
@@ -118,14 +119,23 @@ defmodule Astarte.VMQ.Plugin do
   end
 
   def on_register({ip_addr, _port}, {_mountpoint, client_id}, _username) do
-    timestamp = now_us_x10_timestamp()
+    with [realm, device_id] <- String.split(client_id, "/") do
+      # Start the heartbeat
+      setup_heartbeat_timer(realm, device_id, self())
 
-    ip_string =
-      ip_addr
-      |> :inet.ntoa()
-      |> to_string()
+      timestamp = now_us_x10_timestamp()
 
-    publish_event(client_id, "connection", timestamp, x_astarte_remote_ip: ip_string)
+      ip_string =
+        ip_addr
+        |> :inet.ntoa()
+        |> to_string()
+
+      publish_event(client_id, "connection", timestamp, x_astarte_remote_ip: ip_string)
+    else
+      # Not a device, ignoring it
+      _ ->
+        :ok
+    end
   end
 
   def on_publish(_username, {_mountpoint, client_id}, _qos, topic_tokens, payload, _isretain) do
@@ -149,6 +159,33 @@ defmodule Astarte.VMQ.Plugin do
       _ ->
         :ok
     end
+  end
+
+  def handle_heartbeat(realm, device_id, session_pid) do
+    if Process.alive?(session_pid) do
+      publish_heartbeat(realm, device_id)
+
+      setup_heartbeat_timer(realm, device_id, session_pid)
+    else
+      # The session is not alive anymore, just stop
+      :ok
+    end
+  end
+
+  defp setup_heartbeat_timer(realm, device_id, session_pid) do
+    args = [realm, device_id, session_pid]
+    interval = Config.heartbeat_interval_ms() |> randomize_interval(0.25)
+    {:ok, _timer} = :timer.apply_after(interval, __MODULE__, :handle_heartbeat, args)
+
+    :ok
+  end
+
+  defp randomize_interval(interval, tolerance) do
+    multiplier = 1 + (tolerance * 2 * :random.uniform() - tolerance)
+
+    (interval * multiplier)
+    |> Float.round()
+    |> trunc()
   end
 
   defp publish_introspection(realm, device_id, payload, timestamp) do
@@ -175,6 +212,12 @@ defmodule Astarte.VMQ.Plugin do
       _ ->
         :ok
     end
+  end
+
+  defp publish_heartbeat(realm, device_id) do
+    timestamp = now_us_x10_timestamp()
+
+    publish(realm, device_id, "", "heartbeat", timestamp)
   end
 
   defp publish(realm, device_id, payload, event_string, timestamp, additional_headers \\ []) do

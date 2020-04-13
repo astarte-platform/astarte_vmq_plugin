@@ -22,6 +22,9 @@ defmodule Astarte.VMQ.Plugin.Config do
   Astarte.VMQ.Plugin
   """
 
+  # 1 hour
+  @default_heartbeat_interval_ms 60 * 60 * 1000
+
   @doc """
   Load the configuration and transform it if needed (since we are retrieving
   it from Erlang with Cuttlefish, the strings have to be converted to Elixir
@@ -93,6 +96,14 @@ defmodule Astarte.VMQ.Plugin.Config do
 
   def registry_mfa do
     Application.get_env(:astarte_vmq_plugin, :registry_mfa)
+  end
+
+  def heartbeat_interval_ms do
+    Application.get_env(
+      :astarte_vmq_plugin,
+      :heartbeat_interval_ms,
+      @default_heartbeat_interval_ms
+    )
   end
 
   defp normalize_opts_strings(amqp_options) do
