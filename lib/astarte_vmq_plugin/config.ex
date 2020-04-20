@@ -23,7 +23,7 @@ defmodule Astarte.VMQ.Plugin.Config do
   """
 
   # 1 hour
-  @default_heartbeat_interval_ms 60 * 60 * 1000
+  @default_device_heartbeat_interval_ms 60 * 60 * 1000
 
   @doc """
   Load the configuration and transform it if needed (since we are retrieving
@@ -98,11 +98,11 @@ defmodule Astarte.VMQ.Plugin.Config do
     Application.get_env(:astarte_vmq_plugin, :registry_mfa)
   end
 
-  def heartbeat_interval_ms do
+  def device_heartbeat_interval_ms do
     Application.get_env(
       :astarte_vmq_plugin,
-      :heartbeat_interval_ms,
-      @default_heartbeat_interval_ms
+      :device_heartbeat_interval_ms,
+      @default_device_heartbeat_interval_ms
     )
   end
 
