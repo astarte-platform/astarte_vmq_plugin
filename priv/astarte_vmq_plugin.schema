@@ -60,7 +60,7 @@
     {datatype, string}
   ]}.
 
-{mapping, "astarte_vmq_plugin.heartbeat_interval_ms", "astarte_vmq_plugin.heartbeat_interval_ms",
+{mapping, "astarte_vmq_plugin.device_heartbeat_interval_ms", "astarte_vmq_plugin.device_heartbeat_interval_ms",
   [
     {datatype, integer}
   ]}.

@@ -174,7 +174,7 @@ defmodule Astarte.VMQ.Plugin do
 
   defp setup_heartbeat_timer(realm, device_id, session_pid) do
     args = [realm, device_id, session_pid]
-    interval = Config.heartbeat_interval_ms() |> randomize_interval(0.25)
+    interval = Config.device_heartbeat_interval_ms() |> randomize_interval(0.25)
     {:ok, _timer} = :timer.apply_after(interval, __MODULE__, :handle_heartbeat, args)
 
     :ok
