@@ -43,6 +43,20 @@
     {datatype, {enum, [true, false]}}
   ]}.
 
+{mapping, "astarte_vmq_plugin.amqp_ssl.ssl_enabled", "astarte_vmq_plugin.amqp_ssl.ssl_enabled", [
+    {datatype, {enum, [true, false]}},
+    {default, false}
+]}.
+
+{mapping, "astarte_vmq_plugin.amqp_ssl.disable_sni", "astarte_vmq_plugin.amqp_ssl.disable_sni", [
+    {datatype, {enum, [true, false]}},
+    {default, false}
+  ]}.
+
+{mapping, "astarte_vmq_plugin.amqp_ssl.custom_sni", "astarte_vmq_plugin.amqp_ssl.custom_sni", [
+    {datatype, string}
+]}.
+
 {mapping, "astarte_vmq_plugin.amqp.data_queue_prefix", "astarte_vmq_plugin.data_queue_prefix",
   [
     {default, "astarte_data_"},
