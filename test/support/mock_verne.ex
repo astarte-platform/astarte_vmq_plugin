@@ -10,6 +10,8 @@ defmodule Astarte.VMQ.Plugin.MockVerne do
 
     publish_fun = fn topic, payload, opts ->
       Agent.update(__MODULE__, &:queue.in({topic, payload, opts}, &1))
+      # Adapt to the new {:ok, {local_matches, remote_matches}} return value
+      {:ok, {1, 0}}
     end
 
     {empty_fun, publish_fun, {empty_fun, empty_fun}}

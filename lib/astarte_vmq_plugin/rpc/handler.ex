@@ -86,7 +86,7 @@ defmodule Astarte.VMQ.Plugin.RPC.Handler do
 
   defp call_rpc({:publish, %Publish{topic_tokens: topic_tokens, payload: payload, qos: qos}}) do
     case Publisher.publish(topic_tokens, payload, qos) do
-      :ok ->
+      {:ok, _} ->
         generic_ok()
 
       {:error, reason} ->
