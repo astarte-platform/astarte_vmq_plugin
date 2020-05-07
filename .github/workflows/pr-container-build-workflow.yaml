@@ -14,7 +14,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Building Docker Image
-      working-directory: ./docker
       env:
         CONTAINER_IMAGE_NAME: gh_actions_test
       run: docker build -t $CONTAINER_IMAGE_NAME:ci-test .
