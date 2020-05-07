@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Send a periodic heartbeat for every connected device.
 
+## [0.11.1] - Unreleased
+### Added
+- Enhance docker build process
+
 ## [0.11.0] - 2020-04-13
 
 ## [0.11.0-rc.1] - 2020-03-26
