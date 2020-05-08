@@ -81,7 +81,14 @@ EOF
     echo "erlang.distribution.port_range.maximum = 9109" >> /opt/vernemq/etc/vernemq.conf
     echo "listener.tcp.default = ${IP_ADDRESS}:1883" >> /opt/vernemq/etc/vernemq.conf
     if env | grep -q "VERNEMQ_ENABLE_SSL_LISTENER"; then
+        # Populate SSL config
         echo "listener.ssl.default = ${IP_ADDRESS}:8883" >> /opt/vernemq/etc/vernemq.conf
+        echo "listener.ssl.cafile = /opt/vernemq/etc/ca.pem" >> /opt/vernemq/etc/vernemq.conf
+        echo "listener.ssl.certfile = /opt/vernemq/etc/cert.pem" >> /opt/vernemq/etc/vernemq.conf
+        echo "listener.ssl.keyfile = /opt/vernemq/etc/privkey.pem" >> /opt/vernemq/etc/vernemq.conf
+        echo "listener.ssl.require_certificate = on" >> /opt/vernemq/etc/vernemq.conf
+        echo "listener.ssl.use_identity_as_username = on" >> /opt/vernemq/etc/vernemq.conf
+        echo "listener.ssl.tls_version = tlsv1.2" >> /opt/vernemq/etc/vernemq.conf
     fi
     # We enable the revproxy listener regardless.
     echo "listener.tcp.revproxy = ${IP_ADDRESS}:1885" >> /opt/vernemq/etc/vernemq.conf
