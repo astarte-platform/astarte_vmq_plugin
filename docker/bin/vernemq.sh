@@ -92,15 +92,6 @@ EOF
     echo "########## End ##########" >> /opt/vernemq/etc/vernemq.conf
 fi
 
-# Check configuration file
-/opt/vernemq/bin/vernemq config generate 2>&1 > /dev/null | tee /tmp/config.out | grep error
-
-if [ $? -ne 1 ]; then
-    echo "configuration error, exit"
-    echo "$(cat /tmp/config.out)"
-    exit $?
-fi
-
 if env | grep -q "VERNEMQ_ENABLE_SSL_LISTENER"; then
     # Let's do our magic. First of all, let's ask for certificates.
     if ! curl -s -d '{"label": "primary"}' -X POST $CFSSL_URL/api/v1/cfssl/info | jq -e -r ".result.certificate" > /etc/ssl/cfssl-ca-cert.crt; then
@@ -142,6 +133,15 @@ if env | grep -q "VERNEMQ_ENABLE_SSL_LISTENER"; then
         # And now we merge.
         cat /etc/ssl/vernemq-certs/cert /etc/ssl/cfssl-ca-cert.crt > /opt/vernemq/etc/ca.pem
     fi
+fi
+
+# Check configuration file
+/opt/vernemq/bin/vernemq config generate 2>&1 > /dev/null | tee /tmp/config.out | grep error
+
+if [ $? -ne 1 ]; then
+    echo "configuration error, exit"
+    echo "$(cat /tmp/config.out)"
+    exit $?
 fi
 
 pid=0

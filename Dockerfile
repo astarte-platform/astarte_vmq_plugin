@@ -1,10 +1,13 @@
 # Build with Elixir 1.5/OTP 20
-FROM elixir:1.8.1 as builder
+FROM elixir:1.10.3 as builder
 
 WORKDIR /build
 
+# Needed for VerneMQ 1.10.2
+RUN apt-get -qq update && apt-get -qq install libsnappy-dev
+
 # Let's start by building VerneMQ
-RUN git clone --branch 1.7.1 https://github.com/erlio/vernemq.git && \
+RUN git clone --branch 1.10.2 https://github.com/erlio/vernemq.git && \
 		cd vernemq && \
 		make rel && \
 		cd ..
@@ -46,7 +49,7 @@ COPY docker/bin/vernemq.sh /build/vernemq/_build/default/rel/vernemq/bin/
 RUN chmod +x /build/vernemq/_build/default/rel/vernemq/bin/vernemq.sh
 
 # Note: it is important to keep Debian versions in sync, or incompatibilities between libcrypto will happen
-FROM debian:stretch-slim
+FROM debian:buster-slim
 
 # Set the locale
 ENV LANG C.UTF-8
@@ -55,7 +58,7 @@ ENV LANG C.UTF-8
 ARG BUILD_ENV=prod
 
 # We need SSL, curl, iproute2 and jq - and to ensure /etc/ssl/astarte
-RUN apt-get -qq update && apt-get -qq install libssl1.1 curl jq iproute2 netcat && apt-get clean && mkdir -p /etc/ssl/astarte
+RUN apt-get -qq update && apt-get -qq install libssl1.1 curl jq iproute2 netcat libsnappy1v5 && apt-get clean && mkdir -p /etc/ssl/astarte
 
 # Copy our built stuff (both are self-contained with their ERTS release)
 COPY --from=builder /build/vernemq/_build/default/rel/vernemq /opt/vernemq/
