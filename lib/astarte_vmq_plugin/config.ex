@@ -34,6 +34,7 @@ defmodule Astarte.VMQ.Plugin.Config do
     amqp_opts =
       Application.get_env(:astarte_vmq_plugin, :amqp_options, [])
       |> normalize_opts_strings()
+      |> init_ssl_options()
 
     Application.put_env(:astarte_vmq_plugin, :amqp_options, amqp_opts)
 
@@ -65,6 +66,43 @@ defmodule Astarte.VMQ.Plugin.Config do
       end
 
     Application.put_env(:astarte_rpc, :amqp_connection, astarte_rpc_amqp_opts)
+  end
+
+  defp init_ssl_options(amqp_options) do
+    amqp_ssl = Application.get_env(:astarte_vmq_plugin, :amqp_ssl, [])
+    ssl_enabled = Keyword.get(amqp_ssl, :ssl_enabled, false)
+    ssl_options = Keyword.get(amqp_options, :ssl_options, [])
+
+    if ssl_enabled do
+      updated_ssl_options =
+        populate_sni(amqp_ssl, amqp_options)
+        |> Keyword.merge(ssl_options)
+
+      Keyword.put(amqp_options, :ssl_options, updated_ssl_options)
+    else
+      amqp_options
+    end
+  end
+
+  defp populate_sni(amqp_ssl, amqp_options) do
+    [verify: :verify_peer]
+    |> set_sni_value(amqp_ssl, amqp_options)
+  end
+
+  defp set_sni_value(opts, amqp_ssl, amqp_options) do
+    disable_sni = Keyword.get(amqp_ssl, :disable_sni, false)
+
+    sni =
+      if disable_sni do
+        :disabled
+      else
+        host = Keyword.get(amqp_options, :host)
+
+        Keyword.get(amqp_ssl, :custom_sni, host)
+        |> to_charlist()
+      end
+
+    Keyword.put(opts, :server_name_indication, sni)
   end
 
   @doc """
