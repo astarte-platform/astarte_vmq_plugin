@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## Unreleased
 ### Added
 - Send a periodic heartbeat for every connected device.
+- Support SSL for RabbitMQ connections.
+- Default max certificate chain length to 10.
 
 ## [0.11.1] - Unreleased
 ### Added
