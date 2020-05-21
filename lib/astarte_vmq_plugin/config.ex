@@ -85,7 +85,10 @@ defmodule Astarte.VMQ.Plugin.Config do
   end
 
   defp populate_sni(amqp_ssl, amqp_options) do
-    [verify: :verify_peer]
+    [
+      verify: :verify_peer,
+      depth: 10
+    ]
     |> set_sni_value(amqp_ssl, amqp_options)
   end
 
