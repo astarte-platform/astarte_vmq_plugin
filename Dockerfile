@@ -7,8 +7,11 @@ WORKDIR /build
 RUN apt-get -qq update && apt-get -qq install libsnappy-dev
 
 # Let's start by building VerneMQ
-RUN git clone --branch 1.10.2 https://github.com/erlio/vernemq.git && \
+# TODO: use a stable version as soon as 1.10.3 is released
+# for now build from master since we need https://github.com/vernemq/vernemq/pull/1518
+RUN git clone https://github.com/erlio/vernemq.git && \
 		cd vernemq && \
+		git checkout a4fd2180036a55bed586244c97e66c380b51411e && \
 		make rel && \
 		cd ..
 
