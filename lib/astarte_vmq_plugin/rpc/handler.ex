@@ -25,6 +25,7 @@ defmodule Astarte.VMQ.Plugin.RPC.Handler do
     GenericErrorReply,
     GenericOkReply,
     Publish,
+    PublishReply,
     Reply
   }
 
@@ -86,8 +87,8 @@ defmodule Astarte.VMQ.Plugin.RPC.Handler do
 
   defp call_rpc({:publish, %Publish{topic_tokens: topic_tokens, payload: payload, qos: qos}}) do
     case Publisher.publish(topic_tokens, payload, qos) do
-      {:ok, _} ->
-        generic_ok()
+      {:ok, {local_matches, remote_matches}} ->
+        publish_reply(local_matches, remote_matches)
 
       {:error, reason} ->
         Logger.warn("Publish failed with reason: #{inspect(reason)}")
@@ -118,6 +119,12 @@ defmodule Astarte.VMQ.Plugin.RPC.Handler do
   defp generic_ok do
     %GenericOkReply{}
     |> encode_reply(:generic_ok_reply)
+    |> ok_wrap
+  end
+
+  defp publish_reply(local_matches, remote_matches) do
+    %PublishReply{local_matches: local_matches, remote_matches: remote_matches}
+    |> encode_reply(:publish_reply)
     |> ok_wrap
   end
 

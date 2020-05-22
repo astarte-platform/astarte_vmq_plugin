@@ -22,8 +22,8 @@ defmodule Astarte.VMQ.Plugin.RPCTest do
   alias Astarte.RPC.Protocol.VMQ.Plugin.{
     Call,
     GenericErrorReply,
-    GenericOkReply,
     Publish,
+    PublishReply,
     Reply
   }
 
@@ -148,8 +148,8 @@ defmodule Astarte.VMQ.Plugin.RPCTest do
     assert %Reply{
              version: 0,
              reply: {
-               :generic_ok_reply,
-               %GenericOkReply{}
+               :publish_reply,
+               %PublishReply{}
              }
            } = Reply.decode(ser_reply)
 
