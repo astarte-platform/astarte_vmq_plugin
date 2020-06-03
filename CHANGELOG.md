@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Support SSL for RabbitMQ connections.
 - Default max certificate chain length to 10.
 - Reply with local and remote matches when a publish is requested.
+- Allow configuring `max_offline_messages` and `persistent_client_expiration` with Docker env
+  variables
 
 ## [0.11.1] - Unreleased
 ### Added
