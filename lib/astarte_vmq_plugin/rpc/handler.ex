@@ -51,7 +51,7 @@ defmodule Astarte.VMQ.Plugin.RPC.Handler do
 
   defp call_rpc({:disconnect, %Disconnect{client_id: ""}}) do
     Logger.warn("Disconnect with empty client_id")
-    generic_error(:client_id_is_emtpy, "client_id is \"\"")
+    generic_error(:client_id_is_empty, "client_id is \"\"")
   end
 
   defp call_rpc({:disconnect, %Disconnect{discard_state: ""}}) do
