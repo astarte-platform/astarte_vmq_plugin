@@ -65,7 +65,7 @@
 
 {mapping, "astarte_vmq_plugin.amqp.data_queue_count", "astarte_vmq_plugin.data_queue_count",
   [
-    {default, 1},
+    {default, 128},
     {datatype, integer}
   ]}.
 
