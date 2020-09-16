@@ -73,11 +73,6 @@ defmodule Astarte.VMQ.Plugin.RPC.Handler do
     generic_error(:empty_topic_tokens, "empty topic tokens")
   end
 
-  defp call_rpc({:publish, %Publish{payload: ""}}) do
-    Logger.warn("Publish with empty payload")
-    generic_error(:payload_is_empty, "payload is \"\"")
-  end
-
   # This also handles the case of qos == nil, that is > 2
   defp call_rpc({:publish, %Publish{qos: qos}}) when qos > 2 or qos < 0 do
     Logger.warn("Publish with invalid QoS")

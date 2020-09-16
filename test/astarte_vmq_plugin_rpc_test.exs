@@ -67,39 +67,6 @@ defmodule Astarte.VMQ.Plugin.RPCTest do
     assert MockVerne.consume_message() == nil
   end
 
-  test "invalid payload Publish call" do
-    serialized_call =
-      %Call{
-        version: 0,
-        call: {
-          :publish,
-          %Publish{
-            topic_tokens: @topic,
-            payload: nil,
-            qos: 2
-          }
-        }
-      }
-      |> Call.encode()
-
-    assert {:ok, ser_reply} = Handler.handle_rpc(serialized_call)
-
-    assert %Reply{
-             version: 0,
-             reply: {
-               :generic_error_reply,
-               %GenericErrorReply{
-                 error_name: "payload_is_empty",
-                 user_readable_error_name: "",
-                 user_readable_message: "payload is \"\"",
-                 error_data: ""
-               }
-             }
-           } = Reply.decode(ser_reply)
-
-    assert MockVerne.consume_message() == nil
-  end
-
   test "invalid qos Publish call" do
     serialized_call =
       %Call{
