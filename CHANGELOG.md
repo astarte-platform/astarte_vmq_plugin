@@ -4,7 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [1.0.0-beta.1] - Unreleased
+### Changed
+- Default data_queue_count to 128.
+
+## [1.0.0-alpha.1] - 2020-06-19
 ### Added
 - Send a periodic heartbeat for every connected device.
 - Support SSL for RabbitMQ connections.
@@ -12,6 +16,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Reply with local and remote matches when a publish is requested.
 - Allow configuring `max_offline_messages` and `persistent_client_expiration` with Docker env
   variables
+
+## [0.11.3] - Unreleased
+### Fixed
+- Fix bug that prevented property unset
+
+## [0.11.2] - 2020-08-14
+### Added
+- Update Elixir to 1.8.2
 
 ## [0.11.1] - 2020-05-18
 ### Added
