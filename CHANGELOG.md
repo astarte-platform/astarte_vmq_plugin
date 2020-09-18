@@ -17,6 +17,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Allow configuring `max_offline_messages` and `persistent_client_expiration` with Docker env
   variables
 
+## [0.11.3] - Unreleased
+### Fixed
+- Fix bug that prevented property unset
+
+## [0.11.2] - 2020-08-14
+### Added
+- Update Elixir to 1.8.2
+
 ## [0.11.1] - 2020-05-18
 ### Added
 - Enhance docker build process
