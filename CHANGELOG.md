@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Allow configuring `max_offline_messages` and `persistent_client_expiration` with Docker env
   variables
 
-## [0.11.3] - Unreleased
+## [0.11.3] - 2020-09-24
 ### Fixed
 - Fix bug that prevented property unset
 
