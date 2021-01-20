@@ -25,6 +25,7 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
       version: "0.11.3",
       elixir: "~> 1.8",
       elixirc_paths: elixirc_paths(Mix.env()),
+      erlc_paths: ["src"],
       start_permanent: Mix.env() == :prod,
       test_coverage: [tool: ExCoveralls],
       preferred_cli_env: [
