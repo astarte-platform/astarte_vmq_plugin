@@ -59,7 +59,7 @@ jobs:
       fail-fast: false
       matrix:
         rabbitmq:
-        - "rabbitmq:3.7.21-management"
+        - "rabbitmq:3.8.12-management"
     services:
       rabbitmq:
         image: ${{ matrix.rabbitmq }}
