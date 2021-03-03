@@ -128,7 +128,7 @@ defmodule Astarte.VMQ.PluginTest do
       {["and", "so", "on"], 2}
     ]
 
-    assert :ok = Plugin.auth_on_subscribe(:dontcare, {:dontcare, @other_mqtt_user}, topics)
+    assert :next = Plugin.auth_on_subscribe(:dontcare, {:dontcare, @other_mqtt_user}, topics)
   end
 
   test "authorized auth_on_publish for device" do
@@ -209,7 +209,7 @@ defmodule Astarte.VMQ.PluginTest do
     control_topic = [@realm, @device_id, "control", "some", "path"]
     random_topic = ["any", "topic"]
 
-    assert :ok =
+    assert :next =
              Plugin.auth_on_publish(
                :dontcare,
                {:dontcare, @other_mqtt_user},
@@ -219,7 +219,7 @@ defmodule Astarte.VMQ.PluginTest do
                :dontcare
              )
 
-    assert :ok =
+    assert :next =
              Plugin.auth_on_publish(
                :dontcare,
                {:dontcare, @other_mqtt_user},
@@ -229,7 +229,7 @@ defmodule Astarte.VMQ.PluginTest do
                :dontcare
              )
 
-    assert :ok =
+    assert :next =
              Plugin.auth_on_publish(
                :dontcare,
                {:dontcare, @other_mqtt_user},
@@ -239,7 +239,7 @@ defmodule Astarte.VMQ.PluginTest do
                :dontcare
              )
 
-    assert :ok =
+    assert :next =
              Plugin.auth_on_publish(
                :dontcare,
                {:dontcare, @other_mqtt_user},

@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [1.0.0-beta.2] - Unreleased
 ### Changed
 - Update Elixir to 1.11.3 and Erlang/OTP to 23.2
+- Do not authorize non-devices blindly in `auth_on_publish` and `auth_on_subscribe`.
 
 ## [1.0.0-beta.1] - 2021-02-16
 ### Changed
