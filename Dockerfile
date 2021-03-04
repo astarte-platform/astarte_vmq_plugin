@@ -1,14 +1,14 @@
-FROM ispirata/elixir:1.10-otp-23 as builder
+# Build with Elixir 1.11.3/OTP 23
+FROM elixir:1.11.3 as builder
 
 WORKDIR /build
 
-# Needed for VerneMQ 1.10.3
+# Needed for VerneMQ 1.11.0
 RUN apt-get -qq update && apt-get -qq install libsnappy-dev
 
 # Let's start by building VerneMQ
-RUN git clone https://github.com/erlio/vernemq.git && \
+RUN git clone https://github.com/vernemq/vernemq.git -b 1.11.0 && \
 		cd vernemq && \
-		git checkout 12b562046daa19a76a50aa71dfc6e7680c952c07 && \
 		make rel && \
 		cd ..
 
