@@ -59,9 +59,9 @@ defmodule Astarte.VMQ.Plugin do
         _isretain
       ) do
     cond do
-      # Not a device, authorizing everything
+      # Not a device, let someone else decide
       !String.contains?(client_id, "/") ->
-        :ok
+        :next
 
       # Device auth
       String.split(client_id, "/") == Enum.take(topic_tokens, 2) ->
@@ -74,7 +74,8 @@ defmodule Astarte.VMQ.Plugin do
 
   def auth_on_subscribe(_username, {_mountpoint, client_id}, topics) do
     if !String.contains?(client_id, "/") do
-      :ok
+      # Not a device, let someone else decide
+      :next
     else
       client_id_tokens = String.split(client_id, "/")
 
