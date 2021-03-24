@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [1.0.0-beta.2] - Unreleased
+## [1.0.0-beta.2] - 2021-03-24
 ### Changed
 - Update Elixir to 1.11.4 and Erlang/OTP to 23.2
 - Do not authorize non-devices blindly in `auth_on_publish` and `auth_on_subscribe`.
