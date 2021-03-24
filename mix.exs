@@ -76,7 +76,7 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
 
   defp astarte_required_modules(_) do
     [
-      {:astarte_rpc, github: "astarte-platform/astarte_rpc", branch: "release-1.0"}
+      {:astarte_rpc, "~> 1.0.0-beta.2"}
     ]
   end
 
