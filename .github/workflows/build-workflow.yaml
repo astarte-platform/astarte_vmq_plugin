@@ -12,7 +12,7 @@ on:
   pull_request:
 
 env:
-  elixir_version: "1.11.3"
+  elixir_version: "1.11.4"
   otp_version: "23.2"
 
 jobs:
@@ -59,7 +59,7 @@ jobs:
       fail-fast: false
       matrix:
         rabbitmq:
-        - "rabbitmq:3.8.12-management"
+        - "rabbitmq:3.8.14-management"
     services:
       rabbitmq:
         image: ${{ matrix.rabbitmq }}

@@ -1,5 +1,5 @@
 # Build with Elixir 1.11.3/OTP 23
-FROM elixir:1.11.3 as builder
+FROM elixir:1.11.4 as builder
 
 WORKDIR /build
 
