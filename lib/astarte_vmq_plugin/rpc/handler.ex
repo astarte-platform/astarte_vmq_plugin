@@ -41,7 +41,7 @@ defmodule Astarte.VMQ.Plugin.RPC.Handler do
   end
 
   defp extract_call_tuple(%Call{call: nil}) do
-    Logger.warn("Received empty call")
+    Logger.warn("Received empty call", tag: "received_empty_call")
     {:error, :empty_call}
   end
 
@@ -50,12 +50,12 @@ defmodule Astarte.VMQ.Plugin.RPC.Handler do
   end
 
   defp call_rpc({:disconnect, %Disconnect{client_id: ""}}) do
-    Logger.warn("Disconnect with empty client_id")
+    Logger.warn("Disconnect with empty client_id", tag: "disconnect_empty_client_id")
     generic_error(:client_id_is_empty, "client_id is \"\"")
   end
 
   defp call_rpc({:disconnect, %Disconnect{discard_state: ""}}) do
-    Logger.warn("Disconnect with empty discard_state")
+    Logger.warn("Disconnect with empty discard_state", tag: "disconnect_empty_discard_state")
     generic_error(:discard_state_is_empty, "discard_state is \"\"")
   end
 
@@ -70,13 +70,13 @@ defmodule Astarte.VMQ.Plugin.RPC.Handler do
   end
 
   defp call_rpc({:publish, %Publish{topic_tokens: []}}) do
-    Logger.warn("Publish with empty topic_tokens")
+    Logger.warn("Publish with empty topic_tokens", tag: "publish_empty_topic_tokens")
     generic_error(:empty_topic_tokens, "empty topic tokens")
   end
 
   # This also handles the case of qos == nil, that is > 2
   defp call_rpc({:publish, %Publish{qos: qos}}) when qos > 2 or qos < 0 do
-    Logger.warn("Publish with invalid QoS")
+    Logger.warn("Publish with invalid QoS", tag: "publish_invalid_qos")
     generic_error(:invalid_qos, "invalid QoS")
   end
 
@@ -86,11 +86,14 @@ defmodule Astarte.VMQ.Plugin.RPC.Handler do
         publish_reply(local_matches, remote_matches)
 
       {:error, reason} ->
-        Logger.warn("Publish failed with reason: #{inspect(reason)}")
+        Logger.warn("Publish failed with reason: #{inspect(reason)}", tag: "publish_failed")
         generic_error(reason)
 
       other_err ->
-        Logger.warn("Unknown error in publish: #{inspect(other_err)}")
+        Logger.warn("Unknown error in publish: #{inspect(other_err)}",
+          tag: "publish_failed_unknown_error"
+        )
+
         generic_error(:publish_error, "error during publish")
     end
   end
