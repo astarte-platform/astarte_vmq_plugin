@@ -76,14 +76,14 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
 
   defp astarte_required_modules(_) do
     [
-      {:astarte_rpc, "~> 1.0.0-beta.2"}
+      {:astarte_rpc, github: "astarte-platform/astarte_rpc", branch: "release-1.0"}
     ]
   end
 
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:amqp, "~> 1.4"},
+      {:amqp, "~> 2.1"},
       {:vernemq_dev, github: "vernemq/vernemq_dev"},
       {:excoveralls, "~> 0.12", only: :test},
       {:pretty_log, "~> 0.1"},
