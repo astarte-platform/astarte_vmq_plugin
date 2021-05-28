@@ -45,13 +45,18 @@ defmodule Astarte.VMQ.Plugin.AMQPClient do
   end
 
   def terminate(reason, %Channel{conn: conn} = chan) do
-    Logger.warn("AMQPClient terminated with reason #{inspect(reason)}")
+    Logger.warn("AMQPClient terminated with reason #{inspect(reason)}",
+      tag: "ampq_client_terminate"
+    )
+
     Channel.close(chan)
     Connection.close(conn)
   end
 
   def terminate(reason, _state) do
-    Logger.warn("AMQPClient terminated with reason #{inspect(reason)}")
+    Logger.warn("AMQPClient terminated with reason #{inspect(reason)}",
+      tag: "ampq_client_terminate"
+    )
   end
 
   def handle_call({:publish, _payload, _opts}, _from, :not_connected = state) do
@@ -90,7 +95,9 @@ defmodule Astarte.VMQ.Plugin.AMQPClient do
   end
 
   def handle_info({:DOWN, _, :process, _pid, reason}, _state) do
-    Logger.warn("RabbitMQ connection lost: #{inspect(reason)}. Trying to reconnect...")
+    Logger.warn("RabbitMQ connection lost: #{inspect(reason)}. Trying to reconnect...",
+      tag: "rabbitmq_connection_lost"
+    )
 
     with {:ok, channel} <- connect() do
       {:noreply, channel}
@@ -108,19 +115,22 @@ defmodule Astarte.VMQ.Plugin.AMQPClient do
       {:ok, chan}
     else
       {:error, reason} ->
-        Logger.warn("RabbitMQ Connection error: " <> inspect(reason))
+        Logger.warn("RabbitMQ Connection error: " <> inspect(reason),
+          tag: "rabbitmq_connection_error"
+        )
+
         retry_connection_after(@connection_backoff)
         {:error, :not_connected}
 
       :error ->
-        Logger.warn("Unknown RabbitMQ connection error")
+        Logger.warn("Unknown RabbitMQ connection error", tag: "rabbitmq_connection_error")
         retry_connection_after(@connection_backoff)
         {:error, :not_connected}
     end
   end
 
   defp retry_connection_after(backoff) do
-    Logger.warn("Retrying connection in #{backoff} ms")
+    Logger.warn("Retrying connection in #{backoff} ms", tag: "retrying_connection")
     Process.send_after(self(), :try_to_connect, backoff)
   end
 end
