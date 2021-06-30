@@ -27,7 +27,13 @@ defmodule Astarte.VMQ.Plugin.Application do
   alias Astarte.RPC.Protocol.VMQ.Plugin, as: Protocol
   alias Astarte.VMQ.Plugin.Config
 
+  require Logger
+
+  @app_version Mix.Project.config()[:version]
+
   def start(_type, _args) do
+    Logger.info("Starting Astarte plugin v#{@app_version}.", tag: "vmq_plugin_app_start")
+
     Config.init()
 
     # List all child processes to be supervised
