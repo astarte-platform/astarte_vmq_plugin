@@ -5,10 +5,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [1.0.0] - 2021-06-30
-
-## [1.0.0-rc.0] - 2021-05-05
 ### Changed
 - Log plugin version when the application is starting.
+
+## [1.0.0-rc.0] - 2021-05-05
 
 ## [1.0.0-beta.2] - 2021-03-24
 ### Changed
