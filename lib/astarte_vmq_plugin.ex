@@ -42,7 +42,6 @@ defmodule Astarte.VMQ.Plugin do
        [
          subscriber_id: subscriber_id,
          max_inflight_messages: 100,
-         max_message_rate: 10000,
          max_message_size: 65535,
          retry_interval: 20000,
          upgrade_qos: false
