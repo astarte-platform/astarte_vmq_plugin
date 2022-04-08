@@ -7,6 +7,10 @@ WORKDIR /build
 RUN apt-get -qq update && apt-get -qq install libsnappy-dev
 
 # Let's start by building VerneMQ
+# VerneMQ 1.11.0 uses git protocol, but it's no more supported by Github.
+# See https://github.blog/2021-09-01-improving-git-protocol-security-github/
+RUN git config --global url.https://.insteadOf git://
+
 RUN git clone https://github.com/vernemq/vernemq.git -b 1.11.0 && \
 		cd vernemq && \
 		make rel && \
