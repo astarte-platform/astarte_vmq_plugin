@@ -101,10 +101,12 @@ fi
 
 if env | grep -q "VERNEMQ_ENABLE_SSL_LISTENER"; then
     # Let's do our magic. First of all, let's ask for certificates.
-    if ! curl -s -d '{"label": "primary"}' -X POST $CFSSL_URL/api/v1/cfssl/info | jq -e -r ".result.certificate" > /etc/ssl/cfssl-ca-cert.crt; then
+    cacert=$(curl -s -d '{"label": "primary"}' -X POST $CFSSL_URL/api/v1/cfssl/info | jq -e -r ".result.certificate")
+    if [ -z "$cacert" ]; then
         echo "Could not retrieve certificate from CFSSL at $CFSSL_URL , exiting"
-        exit $?
+        exit 1
     fi
+    echo "$cacert" > /etc/ssl/cfssl-ca-cert.crt
     if env | grep -q "USE_LETSENCRYPT"; then
         # TODO: Make this rotate in case we're using Let's encrypt
         echo "You have chosen Let's encrypt as the deploy mechanism - this means clustering Verne is impossible!"
