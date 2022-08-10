@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [1.0.4] - Unreleased
 ### Fixed
 - Do not let VerneMQ container start unless the CA cert is retrieved from CFSSL.
+- Prevent the connection from timing out when the client takes more than 5 seconds to perform the
+  SSL handshake
 
 ## [1.0.3] - 2022-04-07
 
