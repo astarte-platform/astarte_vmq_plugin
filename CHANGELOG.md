@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.0.4] - Unreleased
+### Fixed
+- Do not let VerneMQ container start unless the CA cert is retrieved from CFSSL.
+- Prevent the connection from timing out when the client takes more than 5 seconds to perform the
+  SSL handshake
+
+## [1.0.3] - 2022-04-07
+
+## [1.0.2] - 2022-03-30
+
 ## [1.0.1] - 2021-12-16
 ### Fixed
 - Do not override VerneMQ config `max_message_rate` value.
