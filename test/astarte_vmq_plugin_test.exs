@@ -29,6 +29,7 @@ defmodule Astarte.VMQ.PluginTest do
   @realm "test"
   @device_base_path "#{@realm}/#{@device_id}"
   @other_mqtt_user "other"
+  @another_mqtt_user "another"
   @queue_name "#{Config.data_queue_prefix()}0"
 
   setup_all do
@@ -408,7 +409,7 @@ defmodule Astarte.VMQ.PluginTest do
 
     Plugin.on_register({ip_addr, :dontcare}, {:dontcare, @other_mqtt_user}, :dontcare)
     Plugin.on_client_gone({:dontcare, @other_mqtt_user})
-    Plugin.on_client_offline({:dontcare, @other_mqtt_user})
+    Plugin.on_client_offline({:dontcare, @another_mqtt_user})
 
     introspection_topic = [@realm, @device_id]
     payload = "com.an.Interface:1:0;com.another.Interface:2:0"
@@ -492,6 +493,224 @@ defmodule Astarte.VMQ.PluginTest do
     :ok = Plugin.handle_heartbeat(@realm, @device_id, dead_process)
 
     refute_receive {:amqp_msg, _payload, _meta}
+  end
+
+  describe "disconnection and connection events are correctly serialized" do
+    test "when on_register is called just before on_client_offline" do
+      ip_addr = {2, 3, 4, 5}
+
+      Plugin.on_register({ip_addr, :dontcare}, {:dontcare, @device_base_path}, :dontcare)
+      # Call hook in another process, as VMQ does
+      Task.start(Plugin, :on_client_offline, [{:dontcare, @device_base_path}])
+
+      # Make sure messages were received
+      Process.sleep(100)
+
+      # Disconnection is received before connection
+      assert {:messages, [disconnect_message, reconnect_message]} =
+               Process.info(self(), :messages)
+
+      assert {:amqp_msg, "",
+              %{
+                headers: disconnection_headers,
+                timestamp: disconnection_timestamp,
+                message_id: disconnection_message_id
+              }} = disconnect_message
+
+      assert %{
+               "x_astarte_vmqamqp_proto_ver" => 1,
+               "x_astarte_msg_type" => "disconnection",
+               "x_astarte_realm" => @realm,
+               "x_astarte_device_id" => @device_id
+             } = amqp_headers_to_map(disconnection_headers)
+
+      assert String.starts_with?(
+               disconnection_message_id,
+               message_id_prefix(@realm, @device_id, disconnection_timestamp)
+             )
+
+      assert {:amqp_msg, "",
+              %{
+                headers: connection_headers,
+                timestamp: connection_timestamp,
+                message_id: connection_message_id
+              }} = reconnect_message
+
+      assert %{
+               "x_astarte_vmqamqp_proto_ver" => 1,
+               "x_astarte_msg_type" => "connection",
+               "x_astarte_realm" => @realm,
+               "x_astarte_device_id" => @device_id,
+               "x_astarte_remote_ip" => "2.3.4.5"
+             } = amqp_headers_to_map(connection_headers)
+
+      assert String.starts_with?(
+               connection_message_id,
+               message_id_prefix(@realm, @device_id, connection_timestamp)
+             )
+    end
+
+    test "when on_register is called just before on_client_gone" do
+      ip_addr = {2, 3, 4, 5}
+
+      Plugin.on_register({ip_addr, :dontcare}, {:dontcare, @device_base_path}, :dontcare)
+      # Call hook in another process, as VMQ does
+      Task.start(Plugin, :on_client_gone, [{:dontcare, @device_base_path}])
+
+      # Make sure messages were received
+      Process.sleep(100)
+
+      # Disconnection is received before connection
+      assert {:messages, [disconnect_message, reconnect_message]} =
+               Process.info(self(), :messages)
+
+      assert {:amqp_msg, "",
+              %{
+                headers: disconnection_headers,
+                timestamp: disconnection_timestamp,
+                message_id: disconnection_message_id
+              }} = disconnect_message
+
+      assert %{
+               "x_astarte_vmqamqp_proto_ver" => 1,
+               "x_astarte_msg_type" => "disconnection",
+               "x_astarte_realm" => @realm,
+               "x_astarte_device_id" => @device_id
+             } = amqp_headers_to_map(disconnection_headers)
+
+      assert String.starts_with?(
+               disconnection_message_id,
+               message_id_prefix(@realm, @device_id, disconnection_timestamp)
+             )
+
+      assert {:amqp_msg, "",
+              %{
+                headers: connection_headers,
+                timestamp: connection_timestamp,
+                message_id: connection_message_id
+              }} = reconnect_message
+
+      assert %{
+               "x_astarte_vmqamqp_proto_ver" => 1,
+               "x_astarte_msg_type" => "connection",
+               "x_astarte_realm" => @realm,
+               "x_astarte_device_id" => @device_id,
+               "x_astarte_remote_ip" => "2.3.4.5"
+             } = amqp_headers_to_map(connection_headers)
+
+      assert String.starts_with?(
+               connection_message_id,
+               message_id_prefix(@realm, @device_id, connection_timestamp)
+             )
+    end
+
+    test "when on_client_offline is called before on_register" do
+      ip_addr = {2, 3, 4, 5}
+
+      # Call hook in another process, as VMQ does, making sure it happens before on_register
+      Task.async(Plugin, :on_client_offline, [{:dontcare, @device_base_path}]) |> Task.await()
+      Plugin.on_register({ip_addr, :dontcare}, {:dontcare, @device_base_path}, :dontcare)
+
+      # Make sure messages were received
+      Process.sleep(100)
+
+      # Disconnection is received before connection
+      assert {:messages, [disconnect_message, reconnect_message]} =
+               Process.info(self(), :messages)
+
+      assert {:amqp_msg, "",
+              %{
+                headers: disconnection_headers,
+                timestamp: disconnection_timestamp,
+                message_id: disconnection_message_id
+              }} = disconnect_message
+
+      assert %{
+               "x_astarte_vmqamqp_proto_ver" => 1,
+               "x_astarte_msg_type" => "disconnection",
+               "x_astarte_realm" => @realm,
+               "x_astarte_device_id" => @device_id
+             } = amqp_headers_to_map(disconnection_headers)
+
+      assert String.starts_with?(
+               disconnection_message_id,
+               message_id_prefix(@realm, @device_id, disconnection_timestamp)
+             )
+
+      assert {:amqp_msg, "",
+              %{
+                headers: connection_headers,
+                timestamp: connection_timestamp,
+                message_id: connection_message_id
+              }} = reconnect_message
+
+      assert %{
+               "x_astarte_vmqamqp_proto_ver" => 1,
+               "x_astarte_msg_type" => "connection",
+               "x_astarte_realm" => @realm,
+               "x_astarte_device_id" => @device_id,
+               "x_astarte_remote_ip" => "2.3.4.5"
+             } = amqp_headers_to_map(connection_headers)
+
+      assert String.starts_with?(
+               connection_message_id,
+               message_id_prefix(@realm, @device_id, connection_timestamp)
+             )
+    end
+
+    test "when on_client_gone is called before on_register" do
+      ip_addr = {2, 3, 4, 5}
+
+      # Call hook in another process, as VMQ does, making sure it happens before on_register
+      Task.async(Plugin, :on_client_gone, [{:dontcare, @device_base_path}]) |> Task.await()
+      Plugin.on_register({ip_addr, :dontcare}, {:dontcare, @device_base_path}, :dontcare)
+
+      # Make sure messages were received
+      Process.sleep(100)
+
+      # Disconnection is received before connection
+      assert {:messages, [disconnect_message, reconnect_message]} =
+               Process.info(self(), :messages)
+
+      assert {:amqp_msg, "",
+              %{
+                headers: disconnection_headers,
+                timestamp: disconnection_timestamp,
+                message_id: disconnection_message_id
+              }} = disconnect_message
+
+      assert %{
+               "x_astarte_vmqamqp_proto_ver" => 1,
+               "x_astarte_msg_type" => "disconnection",
+               "x_astarte_realm" => @realm,
+               "x_astarte_device_id" => @device_id
+             } = amqp_headers_to_map(disconnection_headers)
+
+      assert String.starts_with?(
+               disconnection_message_id,
+               message_id_prefix(@realm, @device_id, disconnection_timestamp)
+             )
+
+      assert {:amqp_msg, "",
+              %{
+                headers: connection_headers,
+                timestamp: connection_timestamp,
+                message_id: connection_message_id
+              }} = reconnect_message
+
+      assert %{
+               "x_astarte_vmqamqp_proto_ver" => 1,
+               "x_astarte_msg_type" => "connection",
+               "x_astarte_realm" => @realm,
+               "x_astarte_device_id" => @device_id,
+               "x_astarte_remote_ip" => "2.3.4.5"
+             } = amqp_headers_to_map(connection_headers)
+
+      assert String.starts_with?(
+               connection_message_id,
+               message_id_prefix(@realm, @device_id, connection_timestamp)
+             )
+    end
   end
 
   defp amqp_headers_to_map(headers) do
