@@ -7,10 +7,18 @@ WORKDIR /build
 RUN apt-get -qq update && apt-get -qq install libsnappy-dev
 
 # Let's start by building VerneMQ
-RUN git clone https://github.com/vernemq/vernemq.git -b 1.11.0 && \
-		cd vernemq && \
-		make rel && \
-		cd ..
+# VerneMQ 1.11.0 uses git protocol, but it's no more supported by Github.
+# See https://github.blog/2021-09-01-improving-git-protocol-security-github/
+RUN git config --global url.https://.insteadOf git://
+
+RUN git clone https://github.com/vernemq/vernemq.git -b 1.11.0
+
+COPY docker/patches/increase_ssl_handshake_timeout.patch /build/vernemq/
+
+RUN cd vernemq && \
+  git apply increase_ssl_handshake_timeout.patch && \
+  make rel && \
+  cd ..
 
 RUN mix local.hex --force && \
   mix local.rebar --force && \
