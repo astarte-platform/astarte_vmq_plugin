@@ -35,8 +35,10 @@ defmodule Astarte.VMQ.Plugin.Connection.Synchronizer do
       :client_id,
       :connection_headers,
       :connection_timestamp,
+      :connection_from,
       :disconnection_headers,
-      :disconnection_timestamp
+      :disconnection_timestamp,
+      :disconnection_from
     ]
   end
 
@@ -66,11 +68,11 @@ defmodule Astarte.VMQ.Plugin.Connection.Synchronizer do
   end
 
   def handle_connection(pid, timestamp, additional_headers \\ []) do
-    :gen_statem.cast(pid, {:connection, timestamp, additional_headers})
+    :gen_statem.call(pid, {:connection, timestamp, additional_headers})
   end
 
   def handle_disconnection(pid, timestamp, additional_headers \\ []) do
-    :gen_statem.cast(pid, {:disconnection, timestamp, additional_headers})
+    :gen_statem.call(pid, {:disconnection, timestamp, additional_headers})
   end
 
   # Callbacks
@@ -82,29 +84,36 @@ defmodule Astarte.VMQ.Plugin.Connection.Synchronizer do
     {:ok, :accept, data}
   end
 
-  def accept(:cast, {:connection, timestamp, additional_headers}, data) do
-    new_data = %{data | connection_timestamp: timestamp, connection_headers: additional_headers}
+  def accept({:call, from}, {:connection, timestamp, additional_headers}, data) do
+    new_data = %{
+      data
+      | connection_timestamp: timestamp,
+        connection_headers: additional_headers,
+        connection_from: from
+    }
 
     {:next_state, :has_connection, new_data, [timeout_action()]}
   end
 
-  def accept(:cast, {:disconnection, timestamp, additional_headers}, data) do
+  def accept({:call, from}, {:disconnection, timestamp, additional_headers}, data) do
     new_data = %{
       data
       | disconnection_timestamp: timestamp,
-        disconnection_headers: additional_headers
+        disconnection_headers: additional_headers,
+        disconnection_from: from
     }
 
     {:next_state, :has_disconnection, new_data, [timeout_action()]}
   end
 
   def has_connection(
-        :cast,
+        {:call, disconnection_from},
         {:disconnection, disconnection_timestamp, disconnection_headers},
         %Data{
           client_id: client_id,
           connection_timestamp: connection_timestamp,
-          connection_headers: connection_headers
+          connection_headers: connection_headers,
+          connection_from: connection_from
         }
       ) do
     Plugin.publish_event(
@@ -115,6 +124,9 @@ defmodule Astarte.VMQ.Plugin.Connection.Synchronizer do
     )
 
     Plugin.publish_event(client_id, "connection", connection_timestamp, connection_headers)
+
+    :gen_statem.reply(disconnection_from, :ok)
+    :gen_statem.reply(connection_from, :ok)
 
     {:stop, :normal}
   end
@@ -127,14 +139,21 @@ defmodule Astarte.VMQ.Plugin.Connection.Synchronizer do
       data.connection_headers
     )
 
+    :gen_statem.reply(data.connection_from, :ok)
+
     {:stop, :normal}
   end
 
-  def has_disconnection(:cast, {:connection, connection_timestamp, connection_headers}, %Data{
-        client_id: client_id,
-        disconnection_timestamp: disconnection_timestamp,
-        disconnection_headers: disconnection_headers
-      }) do
+  def has_disconnection(
+        {:call, connection_from},
+        {:connection, connection_timestamp, connection_headers},
+        %Data{
+          client_id: client_id,
+          disconnection_timestamp: disconnection_timestamp,
+          disconnection_headers: disconnection_headers,
+          disconnection_from: disconnection_from
+        }
+      ) do
     Plugin.publish_event(
       client_id,
       "disconnection",
@@ -143,6 +162,10 @@ defmodule Astarte.VMQ.Plugin.Connection.Synchronizer do
     )
 
     Plugin.publish_event(client_id, "connection", connection_timestamp, connection_headers)
+
+    :gen_statem.reply(disconnection_from, :ok)
+    :gen_statem.reply(connection_from, :ok)
+
     {:stop, :normal}
   end
 
@@ -154,6 +177,7 @@ defmodule Astarte.VMQ.Plugin.Connection.Synchronizer do
       data.disconnection_headers
     )
 
+    :gen_statem.reply(data.disconnection_from, :ok)
     {:stop, :normal}
   end
 

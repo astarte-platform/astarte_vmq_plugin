@@ -499,7 +499,12 @@ defmodule Astarte.VMQ.PluginTest do
     test "when on_register is called just before on_client_offline" do
       ip_addr = {2, 3, 4, 5}
 
-      Plugin.on_register({ip_addr, :dontcare}, {:dontcare, @device_base_path}, :dontcare)
+      Task.start(Plugin, :on_register, [
+        {ip_addr, :dontcare},
+        {:dontcare, @device_base_path},
+        :dontcare
+      ])
+
       # Call hook in another process, as VMQ does
       Task.start(Plugin, :on_client_offline, [{:dontcare, @device_base_path}])
 
@@ -553,7 +558,12 @@ defmodule Astarte.VMQ.PluginTest do
     test "when on_register is called just before on_client_gone" do
       ip_addr = {2, 3, 4, 5}
 
-      Plugin.on_register({ip_addr, :dontcare}, {:dontcare, @device_base_path}, :dontcare)
+      Task.start(Plugin, :on_register, [
+        {ip_addr, :dontcare},
+        {:dontcare, @device_base_path},
+        :dontcare
+      ])
+
       # Call hook in another process, as VMQ does
       Task.start(Plugin, :on_client_gone, [{:dontcare, @device_base_path}])
 
@@ -607,9 +617,15 @@ defmodule Astarte.VMQ.PluginTest do
     test "when on_client_offline is called before on_register" do
       ip_addr = {2, 3, 4, 5}
 
-      # Call hook in another process, as VMQ does, making sure it happens before on_register
-      Task.async(Plugin, :on_client_offline, [{:dontcare, @device_base_path}]) |> Task.await()
-      Plugin.on_register({ip_addr, :dontcare}, {:dontcare, @device_base_path}, :dontcare)
+      # Call hook in another process, as VMQ does
+      Task.start(Plugin, :on_client_offline, [{:dontcare, @device_base_path}])
+
+      # Call hook in another process, as VMQ does
+      Task.start(Plugin, :on_register, [
+        {ip_addr, :dontcare},
+        {:dontcare, @device_base_path},
+        :dontcare
+      ])
 
       # Make sure messages were received
       Process.sleep(100)
@@ -661,9 +677,15 @@ defmodule Astarte.VMQ.PluginTest do
     test "when on_client_gone is called before on_register" do
       ip_addr = {2, 3, 4, 5}
 
-      # Call hook in another process, as VMQ does, making sure it happens before on_register
-      Task.async(Plugin, :on_client_gone, [{:dontcare, @device_base_path}]) |> Task.await()
-      Plugin.on_register({ip_addr, :dontcare}, {:dontcare, @device_base_path}, :dontcare)
+      # Call hook in another process, as VMQ does
+      Task.start(Plugin, :on_client_gone, [{:dontcare, @device_base_path}])
+
+      # Call hook in another process, as VMQ does
+      Task.start(Plugin, :on_register, [
+        {ip_addr, :dontcare},
+        {:dontcare, @device_base_path},
+        :dontcare
+      ])
 
       # Make sure messages were received
       Process.sleep(100)

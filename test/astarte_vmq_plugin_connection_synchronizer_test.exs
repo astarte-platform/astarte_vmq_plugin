@@ -100,7 +100,7 @@ defmodule Astarte.VMQ.Plugin.Connection.SynchronizerTest do
                {reconciler_pid, nil}
              ]
 
-    # Connect the device
+    # Connect the device (right now we don't care about concurrency)
     Synchronizer.handle_connection(reconciler_pid, connection_timestamp)
 
     # Make sure messages arrived
@@ -118,9 +118,15 @@ defmodule Astarte.VMQ.Plugin.Connection.SynchronizerTest do
     # Now, another reconciler comes in hand
     another_reconciler_pid = get_connection_reconciler_process!(@device_base_path)
 
-    # Correctly ordered events: disconnection before reconnectiom
-    Synchronizer.handle_disconnection(another_reconciler_pid, disconnection_timestamp)
-    Synchronizer.handle_connection(another_reconciler_pid, reconnection_timestamp)
+    # Correctly ordered events: disconnection before reconnection
+    # we use async tasks to simulate concurrency because handle_[dis]connection is sync
+    Task.start(fn ->
+      Synchronizer.handle_disconnection(another_reconciler_pid, disconnection_timestamp)
+    end)
+
+    Task.start(fn ->
+      Synchronizer.handle_connection(another_reconciler_pid, reconnection_timestamp)
+    end)
 
     # Make sure messages arrived
     Process.sleep(100)
@@ -160,7 +166,7 @@ defmodule Astarte.VMQ.Plugin.Connection.SynchronizerTest do
                {reconciler_pid, nil}
              ]
 
-    # Connect the device
+    # Connect the device (right now we don't care about concurrency)
     Synchronizer.handle_connection(reconciler_pid, connection_timestamp)
 
     # Make sure messages arrived
@@ -179,8 +185,14 @@ defmodule Astarte.VMQ.Plugin.Connection.SynchronizerTest do
     another_reconciler_pid = get_connection_reconciler_process!(@device_base_path)
 
     # Make some strange things à la VMQ, like a connection just before a disconnection
-    Synchronizer.handle_connection(another_reconciler_pid, reconnection_timestamp)
-    Synchronizer.handle_disconnection(another_reconciler_pid, disconnection_timestamp)
+    # we use async tasks to simulate concurrency because handle_[dis]connection is sync
+    Task.start(fn ->
+      Synchronizer.handle_connection(another_reconciler_pid, reconnection_timestamp)
+    end)
+
+    Task.start(fn ->
+      Synchronizer.handle_disconnection(another_reconciler_pid, disconnection_timestamp)
+    end)
 
     # Make sure messages arrived
     Process.sleep(100)
