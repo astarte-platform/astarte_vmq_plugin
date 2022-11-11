@@ -23,6 +23,8 @@ defmodule Astarte.VMQ.Plugin do
 
   alias Astarte.VMQ.Plugin.Config
   alias Astarte.VMQ.Plugin.AMQPClient
+  alias Astarte.VMQ.Plugin.Connection.Synchronizer
+  alias Astarte.VMQ.Plugin.Connection.Synchronizer.Supervisor, as: SynchronizerSupervisor
 
   @max_rand trunc(:math.pow(2, 32) - 1)
 
@@ -111,11 +113,17 @@ defmodule Astarte.VMQ.Plugin do
   end
 
   def on_client_gone({_mountpoint, client_id}) do
-    publish_event(client_id, "disconnection", now_us_x10_timestamp())
+    timestamp = now_us_x10_timestamp()
+
+    get_connection_synchronizer_process!(client_id)
+    |> Synchronizer.handle_disconnection(timestamp)
   end
 
   def on_client_offline({_mountpoint, client_id}) do
-    publish_event(client_id, "disconnection", now_us_x10_timestamp())
+    timestamp = now_us_x10_timestamp()
+
+    get_connection_synchronizer_process!(client_id)
+    |> Synchronizer.handle_disconnection(timestamp)
   end
 
   def on_register({ip_addr, _port}, {_mountpoint, client_id}, _username) do
@@ -130,7 +138,8 @@ defmodule Astarte.VMQ.Plugin do
         |> :inet.ntoa()
         |> to_string()
 
-      publish_event(client_id, "connection", timestamp, x_astarte_remote_ip: ip_string)
+      get_connection_synchronizer_process!(client_id)
+      |> Synchronizer.handle_connection(timestamp, x_astarte_remote_ip: ip_string)
     else
       # Not a device, ignoring it
       _ ->
@@ -204,7 +213,7 @@ defmodule Astarte.VMQ.Plugin do
     publish(realm, device_id, payload, "control", timestamp, additional_headers)
   end
 
-  defp publish_event(client_id, event_string, timestamp, additional_headers \\ []) do
+  def publish_event(client_id, event_string, timestamp, additional_headers \\ []) do
     with [realm, device_id] <- String.split(client_id, "/") do
       publish(realm, device_id, "", event_string, timestamp, additional_headers)
     else
@@ -254,5 +263,12 @@ defmodule Astarte.VMQ.Plugin do
     rnd = Enum.random(0..@max_rand) |> Integer.to_string(16)
 
     "#{realm_trunc}-#{device_id_trunc}-#{timestamp_hex_str}-#{rnd}"
+  end
+
+  defp get_connection_synchronizer_process!(client_id) do
+    case SynchronizerSupervisor.start_child(client_id: client_id) do
+      {:ok, pid} -> pid
+      {:error, {:already_started, pid}} -> pid
+    end
   end
 end

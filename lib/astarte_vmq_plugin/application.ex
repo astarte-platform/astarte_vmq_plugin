@@ -39,6 +39,8 @@ defmodule Astarte.VMQ.Plugin.Application do
     # List all child processes to be supervised
     children = [
       Astarte.VMQ.Plugin.AMQPClient,
+      {Registry, keys: :unique, name: AstarteVMQPluginConnectionSynchronizer.Registry},
+      Astarte.VMQ.Plugin.Connection.Synchronizer.Supervisor,
       {Astarte.VMQ.Plugin.Publisher, [Config.registry_mfa()]},
       {Astarte.RPC.AMQP.Server, [amqp_queue: Protocol.amqp_queue(), handler: RPCHandler]}
     ]

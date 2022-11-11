@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+### Fixed
+- Correctly serialize disconnection/reconnection events if VerneMQ hooks are called in
+  the wrong order. Fix https://github.com/astarte-platform/astarte/issues/668.
+
 ## [1.0.4] - 2022-09-26
 ### Fixed
 - Do not let VerneMQ container start unless the CA cert is retrieved from CFSSL.
