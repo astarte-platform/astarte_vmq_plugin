@@ -76,7 +76,7 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
 
   defp astarte_required_modules(_) do
     [
-      {:astarte_rpc, "~> 1.0.4"}
+      {:astarte_rpc, github: "astarte-platform/astarte_rpc"}
     ]
   end
 
@@ -85,7 +85,7 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
     [
       {:amqp, "~> 2.1"},
       {:vernemq_dev, github: "vernemq/vernemq_dev"},
-      {:excoveralls, "~> 0.12", only: :test},
+      {:excoveralls, "~> 0.15", only: :test},
       {:pretty_log, "~> 0.1"},
       {:dialyzex, github: "Comcast/dialyzex", only: [:dev, :ci]}
     ]
