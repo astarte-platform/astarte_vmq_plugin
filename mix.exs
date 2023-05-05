@@ -57,7 +57,8 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
     ]
   end
 
-  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  # Compile order is important to make sure support files are available when testing
+  defp elixirc_paths(:test), do: ["test/support", "lib"]
   defp elixirc_paths(_), do: ["lib"]
 
   defp dialyzer_cache_directory(:ci) do
@@ -77,7 +78,7 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
 
   defp astarte_required_modules(_) do
     [
-      {:astarte_rpc, github: "astarte-platform/astarte_rpc"},
+      {:astarte_rpc, github: "Annopaolo/astarte_rpc", branch: "delete-device"},
       {:astarte_core, github: "astarte-platform/astarte_core"}
     ]
   end

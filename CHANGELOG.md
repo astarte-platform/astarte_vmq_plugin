@@ -22,6 +22,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   (defaults to `true`)
   - `DOCKER_VERNEMQ_ASTARTE_VMQ_PLUGIN__CASSANDRA__SSL_CUSTOM_SNI`
   - `DOCKER_VERNEMQ_ASTARTE_VMQ_PLUGIN__CASSANDRA__SSL_CA_FILE`
+- Added support for device deletion. During deletion, a device is
+  disconnected and not allowed to reconnect until deletion ends.
+  Inflight messages are discarded. After deletion, a device must be
+  registered again in order to connect to Astarte.
 
 ## [1.1.0] - 2023-06-20
 

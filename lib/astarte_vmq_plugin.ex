@@ -1,7 +1,7 @@
 #
 # This file is part of Astarte.
 #
-# Copyright 2017 Ispirata Srl
+# Copyright 2017 - 2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ defmodule Astarte.VMQ.Plugin do
   alias Astarte.VMQ.Plugin.AMQPClient
   alias Astarte.VMQ.Plugin.Connection.Synchronizer
   alias Astarte.VMQ.Plugin.Connection.Synchronizer.Supervisor, as: SynchronizerSupervisor
+  alias Astarte.VMQ.Plugin.Queries
+  alias Astarte.Core.Device
 
   @max_rand trunc(:math.pow(2, 32) - 1)
 
@@ -38,16 +40,7 @@ defmodule Astarte.VMQ.Plugin do
       # Not a device, let someone else decide
       :next
     else
-      subscriber_id = {mountpoint, username}
-      # TODO: we probably want some of these values to be configurable in some way
-      {:ok,
-       [
-         subscriber_id: subscriber_id,
-         max_inflight_messages: 100,
-         max_message_size: 65535,
-         retry_interval: 20000,
-         upgrade_qos: false
-       ]}
+      authorize_registration(mountpoint, username)
     end
   end
 
@@ -181,6 +174,14 @@ defmodule Astarte.VMQ.Plugin do
     end
   end
 
+  def ack_device_deletion(realm_name, encoded_device_id) do
+    timestamp = now_us_x10_timestamp()
+    publish_internal_message(realm_name, encoded_device_id, "/f", "", timestamp)
+    {:ok, decoded_device_id} = Device.decode_device_id(encoded_device_id)
+    {:ok, _} = Queries.ack_device_deletion(realm_name, decoded_device_id)
+    :ok
+  end
+
   defp setup_heartbeat_timer(realm, device_id, session_pid) do
     args = [realm, device_id, session_pid]
     interval = Config.device_heartbeat_interval_ms() |> randomize_interval(0.25)
@@ -213,6 +214,12 @@ defmodule Astarte.VMQ.Plugin do
     publish(realm, device_id, payload, "control", timestamp, additional_headers)
   end
 
+  defp publish_internal_message(realm, device_id, internal_path, payload, timestamp) do
+    additional_headers = [x_astarte_internal_path: internal_path]
+
+    publish(realm, device_id, payload, "internal", timestamp, additional_headers)
+  end
+
   def publish_event(client_id, event_string, timestamp, additional_headers \\ []) do
     with [realm, device_id] <- String.split(client_id, "/") do
       publish(realm, device_id, "", event_string, timestamp, additional_headers)
@@ -224,10 +231,9 @@ defmodule Astarte.VMQ.Plugin do
   end
 
   defp publish_heartbeat(realm, device_id) do
-    additional_headers = [x_astarte_internal_path: "/heartbeat"]
     timestamp = now_us_x10_timestamp()
 
-    publish(realm, device_id, "", "internal", timestamp, additional_headers)
+    publish_internal_message(realm, device_id, "/heartbeat", "", timestamp)
   end
 
   defp publish(realm, device_id, payload, event_string, timestamp, additional_headers \\ []) do
@@ -270,6 +276,69 @@ defmodule Astarte.VMQ.Plugin do
     case SynchronizerSupervisor.start_child(client_id: client_id) do
       {:ok, pid} -> pid
       {:error, {:already_started, pid}} -> pid
+    end
+  end
+
+  defp authorize_registration(mountpoint, username) do
+    [realm, device_id] = String.split(username, "/")
+    {:ok, decoded_device_id} = Device.decode_device_id(device_id, allow_extended_id: true)
+
+    cond do
+      not device_exists?(realm, decoded_device_id) ->
+        {:error, :device_does_not_exist}
+
+      device_deletion_in_progress?(realm, decoded_device_id) ->
+        {:error, :device_deletion_in_progress}
+
+      true ->
+        {:ok, registration_modifiers(mountpoint, username)}
+    end
+  end
+
+  defp registration_modifiers(mountpoint, username) do
+    # TODO: we probably want some of these values to be configurable in some way
+    [
+      subscriber_id: {mountpoint, username},
+      max_inflight_messages: 100,
+      max_message_size: 65535,
+      retry_interval: 20000,
+      upgrade_qos: false
+    ]
+  end
+
+  defp device_exists?(realm, device_id) do
+    case Queries.check_if_device_exists(realm, device_id) do
+      {:ok, result} ->
+        result
+
+      {:error, :invalid_realm_name} ->
+        false
+
+      # Allow a device to connect even if right now the DB is not available
+      {:error, %Xandra.ConnectionError{}} ->
+        true
+
+      # Allow a device to connect even if right now the DB is not available
+      {:error, %Xandra.Error{}} ->
+        true
+    end
+  end
+
+  defp device_deletion_in_progress?(realm, device_id) do
+    case Queries.check_device_deletion_in_progress(realm, device_id) do
+      {:ok, result} ->
+        result
+
+      {:error, :invalid_realm_name} ->
+        false
+
+      {:error, %Xandra.ConnectionError{}} ->
+        # Be conservative: if the device is not being deleted but we can't reach the DB, it will try to connect again when DB is available
+        true
+
+      {:error, %Xandra.Error{}} ->
+        # Be conservative: if the device is not being deleted but we can't reach the DB, it will try to connect again when DB is available
+        true
     end
   end
 end
