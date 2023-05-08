@@ -1,4 +1,4 @@
-FROM hexpm/elixir:1.11.4-erlang-23.2.7-debian-buster-20210208 as builder
+FROM hexpm/elixir:1.14.2-erlang-24.3.4-debian-bullseye-20210902-slim as builder
 
 # install build dependencies
 # --allow-releaseinfo-change allows to pull from 'oldstable'
@@ -55,7 +55,7 @@ COPY docker/bin/vernemq.sh /build/vernemq/_build/default/rel/vernemq/bin/
 RUN chmod +x /build/vernemq/_build/default/rel/vernemq/bin/vernemq.sh
 
 # Note: it is important to keep Debian versions in sync, or incompatibilities between libcrypto will happen
-FROM debian:buster-slim
+FROM debian:bullseye-20210902-slim
 
 # Set the locale
 ENV LANG C.UTF-8
