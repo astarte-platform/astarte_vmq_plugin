@@ -476,9 +476,10 @@ defmodule Astarte.VMQ.PluginTest do
 
     assert %{
              "x_astarte_vmqamqp_proto_ver" => 1,
-             "x_astarte_msg_type" => "heartbeat",
+             "x_astarte_msg_type" => "internal",
              "x_astarte_realm" => @realm,
-             "x_astarte_device_id" => @device_id
+             "x_astarte_device_id" => @device_id,
+             "x_astarte_internal_path" => "/heartbeat"
            } = amqp_headers_to_map(headers)
 
     assert String.starts_with?(message_id, message_id_prefix(@realm, @device_id, timestamp))
