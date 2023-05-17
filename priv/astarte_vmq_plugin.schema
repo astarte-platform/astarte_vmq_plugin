@@ -106,10 +106,56 @@
     hidden
   ]}.
 
+{mapping, "astarte_vmq_plugin.cassandra.nodes", "astarte_vmq_plugin.cassandra_nodes", [
+    {default, "localhost:9042"},
+    {datatype, string}
+  ]}.
+
+{mapping, "astarte_vmq_plugin.cassandra.username", "astarte_vmq_plugin.cassandra_username", [
+    {default, "cassandra"},
+    {datatype, string}
+  ]}.
+
+{mapping, "astarte_vmq_plugin.cassandra.password", "astarte_vmq_plugin.cassandra_password", [
+    {default, "cassandra"},
+    {datatype, string}
+  ]}.
+
+{mapping, "astarte_vmq_plugin.cassandra.pool_size", "astarte_vmq_plugin.cassandra_pool_size", [
+    {default, 10},
+    {datatype, integer}
+  ]}.
+
+{mapping, "astarte_vmq_plugin.cassandra.ssl_enabled", "astarte_vmq_plugin.cassandra_ssl_enabled", [
+    {default, false},
+    {datatype,  {enum, [true, false]}}
+  ]}.
+
+%TODO handle enabled SNI
+{mapping, "astarte_vmq_plugin.cassandra.ssl_disable_sni", "astarte_vmq_plugin.cassandra_ssl_disable_sni", [
+    {default, true},
+    {datatype,  {enum, [true, false]}}
+  ]}.
+
+{mapping, "astarte_vmq_plugin.cassandra.ssl_custom_sni", "astarte_vmq_plugin.cassandra_ssl_custom_sni", [
+    {datatype, string}
+  ]}.
+
+{mapping, "astarte_vmq_plugin.cassandra.ssl_ca_file", "astarte_vmq_plugin.cassandra_ssl_ca_file", [
+        {datatype, string}
+  ]}.
+
 {translation, "astarte_vmq_plugin.registry_mfa",
   fun(Conf) ->
     S = cuttlefish:conf_get("astarte_vmq_plugin.registry_mfa", Conf),
     {ok, T, _} = erl_scan:string(S ++ "."),
     {ok, Term} = erl_parse:parse_term(T),
     Term
+  end}.
+
+{translation, "astarte_vmq_plugin.cassandra_nodes",
+  fun(Conf) ->
+    Nodes = cuttlefish:conf_get("astarte_vmq_plugin.cassandra.nodes", Conf),
+    Splitted = string:split(Nodes, ",", all),
+    lists:map(fun(E) -> string:trim(E, both) end, Splitted)
   end}.

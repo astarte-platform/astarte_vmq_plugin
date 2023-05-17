@@ -1,7 +1,7 @@
 #
 # This file is part of Astarte.
 #
-# Copyright 2017 Ispirata Srl
+# Copyright 2017 - 2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -42,7 +42,8 @@ defmodule Astarte.VMQ.Plugin.Application do
       {Registry, keys: :unique, name: AstarteVMQPluginConnectionSynchronizer.Registry},
       Astarte.VMQ.Plugin.Connection.Synchronizer.Supervisor,
       {Astarte.VMQ.Plugin.Publisher, [Config.registry_mfa()]},
-      {Astarte.RPC.AMQP.Server, [amqp_queue: Protocol.amqp_queue(), handler: RPCHandler]}
+      {Astarte.RPC.AMQP.Server, [amqp_queue: Protocol.amqp_queue(), handler: RPCHandler]},
+      {Xandra.Cluster, Config.xandra_options!()}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
