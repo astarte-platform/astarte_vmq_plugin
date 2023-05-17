@@ -70,13 +70,15 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
 
   defp astarte_required_modules("true") do
     [
-      {:astarte_rpc, in_umbrella: true}
+      {:astarte_rpc, in_umbrella: true},
+      {:astarte_core, in_umbrella: true}
     ]
   end
 
   defp astarte_required_modules(_) do
     [
-      {:astarte_rpc, github: "astarte-platform/astarte_rpc"}
+      {:astarte_rpc, github: "astarte-platform/astarte_rpc"},
+      {:astarte_core, github: "astarte-platform/astarte_core"}
     ]
   end
 
