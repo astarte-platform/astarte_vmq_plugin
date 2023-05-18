@@ -1,7 +1,7 @@
 #
 # This file is part of Astarte.
 #
-# Copyright 2017 Ispirata Srl
+# Copyright 2017 - 2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,9 +25,6 @@ config :lager,
   handlers: [level: :critical]
 
 config :astarte_vmq_plugin, :amqp_options, host: System.get_env("RABBITMQ_HOST") || "rabbitmq"
-
-# make amqp supervisors logs less verbose
-config :logger, handle_otp_reports: false
 
 config :logger, :console,
   format: {PrettyLog.UserFriendlyFormatter, :format},
