@@ -1,4 +1,4 @@
-FROM hexpm/elixir:1.11.4-erlang-23.2.7-debian-buster-20210208 as builder
+FROM hexpm/elixir:1.14.5-erlang-25.3.2-debian-bullseye-20230522-slim as builder
 
 # install build dependencies
 # --allow-releaseinfo-change allows to pull from 'oldstable'
@@ -8,11 +8,11 @@ RUN apt-get update --allow-releaseinfo-change -y \
 
 WORKDIR /build
 
-# Needed for VerneMQ 1.12.6.1
+# Needed for VerneMQ 1.13.0
 RUN apt-get -qq update && apt-get -qq install libsnappy-dev libssl-dev
 
 # Let's start by building VerneMQ
-RUN git clone https://github.com/vernemq/vernemq.git -b 1.12.6.1
+RUN git clone https://github.com/vernemq/vernemq.git -b 1.13.0
 
 RUN cd vernemq && \
   make rel && \
@@ -55,7 +55,7 @@ COPY docker/bin/vernemq.sh /build/vernemq/_build/default/rel/vernemq/bin/
 RUN chmod +x /build/vernemq/_build/default/rel/vernemq/bin/vernemq.sh
 
 # Note: it is important to keep Debian versions in sync, or incompatibilities between libcrypto will happen
-FROM debian:buster-slim
+FROM debian:bullseye-slim
 
 # Set the locale
 ENV LANG C.UTF-8
