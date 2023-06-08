@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [1.1.0-rc.0] - Unreleased
 ### Changed
 - Use the `internal` event type for device heartbeat.
+- Update Elixir to 1.14.5 and Erlang/OTP to 25.3.2.
 
 ## [1.1.0-alpha.0] - 2022-11-24
 ### Fixed

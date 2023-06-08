@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-use Mix.Config
+import Config
 
 config :astarte_vmq_plugin, :registry_mfa, {Astarte.VMQ.Plugin.Utils, :empty_plugin_functions, []}
 
