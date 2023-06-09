@@ -103,10 +103,9 @@ defmodule Astarte.VMQ.Plugin.Connection.SynchronizerTest do
     # Connect the device (right now we don't care about concurrency)
     Synchronizer.handle_connection(reconciler_pid, connection_timestamp)
 
-    # Make sure messages arrived
+    # Make sure the reconciler is dead by now
     Process.sleep(100)
 
-    # The reconciler should be dead by now
     assert Registry.lookup(AstarteVMQPluginConnectionSynchronizer.Registry, @device_base_path) ==
              []
 
@@ -128,25 +127,42 @@ defmodule Astarte.VMQ.Plugin.Connection.SynchronizerTest do
       Synchronizer.handle_connection(another_reconciler_pid, reconnection_timestamp)
     end)
 
-    # Make sure messages arrived
+    # Make sure the other reconciler is dead, too, by now
     Process.sleep(100)
 
-    # The other reconciler should be dead, too, by now
     assert Registry.lookup(AstarteVMQPluginConnectionSynchronizer.Registry, @device_base_path) ==
              []
 
-    # Disconnect arrived before (re)connect
-    assert {:messages, [disconnect_message, reconnect_message]} = Process.info(self(), :messages)
+    # First, disconnection is received...
+    receive do
+      disconnect_message ->
+        assert {:amqp_msg, "",
+                %{
+                  headers: disconnection_headers,
+                  timestamp: ^disconnection_timestamp
+                }} = disconnect_message
 
-    assert {:amqp_msg, "", %{headers: disconnection_headers, timestamp: ^disconnection_timestamp}} =
-             disconnect_message
+        assert %{"x_astarte_msg_type" => "disconnection"} =
+                 amqp_headers_to_map(disconnection_headers)
+    after
+      1_000 -> flunk("Expected disconnection message, did not receive any.")
+    end
 
-    assert %{"x_astarte_msg_type" => "disconnection"} = amqp_headers_to_map(disconnection_headers)
+    # ... and only after, reconnection
+    receive do
+      reconnect_message ->
+        assert {:amqp_msg, "",
+                %{
+                  headers: connection_headers,
+                  timestamp: ^reconnection_timestamp
+                }} = reconnect_message
 
-    assert {:amqp_msg, "", %{headers: reconnection_headers, timestamp: ^reconnection_timestamp}} =
-             reconnect_message
-
-    assert %{"x_astarte_msg_type" => "connection"} = amqp_headers_to_map(reconnection_headers)
+        assert %{
+                 "x_astarte_msg_type" => "connection"
+               } = amqp_headers_to_map(connection_headers)
+    after
+      1_000 -> flunk("Expected connection message, did not receive any.")
+    end
   end
 
   test "Disconnection and reconnection events swapped, but near in time, are correctly reordered" do
@@ -169,10 +185,9 @@ defmodule Astarte.VMQ.Plugin.Connection.SynchronizerTest do
     # Connect the device (right now we don't care about concurrency)
     Synchronizer.handle_connection(reconciler_pid, connection_timestamp)
 
-    # Make sure messages arrived
+    # Make sure the reconciler is dead by now
     Process.sleep(100)
 
-    # The reconciler should be dead by now
     assert Registry.lookup(AstarteVMQPluginConnectionSynchronizer.Registry, @device_base_path) ==
              []
 
@@ -194,25 +209,42 @@ defmodule Astarte.VMQ.Plugin.Connection.SynchronizerTest do
       Synchronizer.handle_disconnection(another_reconciler_pid, disconnection_timestamp)
     end)
 
-    # Make sure messages arrived
+    # Make sure the other reconciler is dead, too, by now
     Process.sleep(100)
 
-    # The other reconciler should be dead, too, by now
     assert Registry.lookup(AstarteVMQPluginConnectionSynchronizer.Registry, @device_base_path) ==
              []
 
-    # Disconnect arrived before (re)connect
-    assert {:messages, [disconnect_message, reconnect_message]} = Process.info(self(), :messages)
+    # First, disconnection is received...
+    receive do
+      disconnect_message ->
+        assert {:amqp_msg, "",
+                %{
+                  headers: disconnection_headers,
+                  timestamp: ^disconnection_timestamp
+                }} = disconnect_message
 
-    assert {:amqp_msg, "", %{headers: disconnection_headers, timestamp: ^disconnection_timestamp}} =
-             disconnect_message
+        assert %{"x_astarte_msg_type" => "disconnection"} =
+                 amqp_headers_to_map(disconnection_headers)
+    after
+      1_000 -> flunk("Expected disconnection message, did not receive any.")
+    end
 
-    assert %{"x_astarte_msg_type" => "disconnection"} = amqp_headers_to_map(disconnection_headers)
+    # ... and only after, reconnection
+    receive do
+      reconnect_message ->
+        assert {:amqp_msg, "",
+                %{
+                  headers: connection_headers,
+                  timestamp: ^reconnection_timestamp
+                }} = reconnect_message
 
-    assert {:amqp_msg, "", %{headers: reconnection_headers, timestamp: ^reconnection_timestamp}} =
-             reconnect_message
-
-    assert %{"x_astarte_msg_type" => "connection"} = amqp_headers_to_map(reconnection_headers)
+        assert %{
+                 "x_astarte_msg_type" => "connection"
+               } = amqp_headers_to_map(connection_headers)
+    after
+      1_000 -> flunk("Expected connection message, did not receive any.")
+    end
   end
 
   defp amqp_headers_to_map(headers) do

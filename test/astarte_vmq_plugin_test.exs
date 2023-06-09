@@ -476,9 +476,10 @@ defmodule Astarte.VMQ.PluginTest do
 
     assert %{
              "x_astarte_vmqamqp_proto_ver" => 1,
-             "x_astarte_msg_type" => "heartbeat",
+             "x_astarte_msg_type" => "internal",
              "x_astarte_realm" => @realm,
-             "x_astarte_device_id" => @device_id
+             "x_astarte_device_id" => @device_id,
+             "x_astarte_internal_path" => "/heartbeat"
            } = amqp_headers_to_map(headers)
 
     assert String.starts_with?(message_id, message_id_prefix(@realm, @device_id, timestamp))
@@ -508,51 +509,56 @@ defmodule Astarte.VMQ.PluginTest do
       # Call hook in another process, as VMQ does
       Task.start(Plugin, :on_client_offline, [{:dontcare, @device_base_path}])
 
-      # Make sure messages were received
-      Process.sleep(100)
+      # First, disconnection is received...
+      receive do
+        disconnect_message ->
+          assert {:amqp_msg, "",
+                  %{
+                    headers: disconnection_headers,
+                    timestamp: disconnection_timestamp,
+                    message_id: disconnection_message_id
+                  }} = disconnect_message
 
-      # Disconnection is received before connection
-      assert {:messages, [disconnect_message, reconnect_message]} =
-               Process.info(self(), :messages)
+          assert %{
+                   "x_astarte_vmqamqp_proto_ver" => 1,
+                   "x_astarte_msg_type" => "disconnection",
+                   "x_astarte_realm" => @realm,
+                   "x_astarte_device_id" => @device_id
+                 } = amqp_headers_to_map(disconnection_headers)
 
-      assert {:amqp_msg, "",
-              %{
-                headers: disconnection_headers,
-                timestamp: disconnection_timestamp,
-                message_id: disconnection_message_id
-              }} = disconnect_message
+          assert String.starts_with?(
+                   disconnection_message_id,
+                   message_id_prefix(@realm, @device_id, disconnection_timestamp)
+                 )
+      after
+        1_000 -> flunk("Expected disconnection message, did not receive any.")
+      end
 
-      assert %{
-               "x_astarte_vmqamqp_proto_ver" => 1,
-               "x_astarte_msg_type" => "disconnection",
-               "x_astarte_realm" => @realm,
-               "x_astarte_device_id" => @device_id
-             } = amqp_headers_to_map(disconnection_headers)
+      # ... and only after, reconnection
+      receive do
+        reconnect_message ->
+          assert {:amqp_msg, "",
+                  %{
+                    headers: connection_headers,
+                    timestamp: connection_timestamp,
+                    message_id: connection_message_id
+                  }} = reconnect_message
 
-      assert String.starts_with?(
-               disconnection_message_id,
-               message_id_prefix(@realm, @device_id, disconnection_timestamp)
-             )
+          assert %{
+                   "x_astarte_vmqamqp_proto_ver" => 1,
+                   "x_astarte_msg_type" => "connection",
+                   "x_astarte_realm" => @realm,
+                   "x_astarte_device_id" => @device_id,
+                   "x_astarte_remote_ip" => "2.3.4.5"
+                 } = amqp_headers_to_map(connection_headers)
 
-      assert {:amqp_msg, "",
-              %{
-                headers: connection_headers,
-                timestamp: connection_timestamp,
-                message_id: connection_message_id
-              }} = reconnect_message
-
-      assert %{
-               "x_astarte_vmqamqp_proto_ver" => 1,
-               "x_astarte_msg_type" => "connection",
-               "x_astarte_realm" => @realm,
-               "x_astarte_device_id" => @device_id,
-               "x_astarte_remote_ip" => "2.3.4.5"
-             } = amqp_headers_to_map(connection_headers)
-
-      assert String.starts_with?(
-               connection_message_id,
-               message_id_prefix(@realm, @device_id, connection_timestamp)
-             )
+          assert String.starts_with?(
+                   connection_message_id,
+                   message_id_prefix(@realm, @device_id, connection_timestamp)
+                 )
+      after
+        1_000 -> flunk("Expected connection message, did not receive any.")
+      end
     end
 
     test "when on_register is called just before on_client_gone" do
@@ -567,51 +573,56 @@ defmodule Astarte.VMQ.PluginTest do
       # Call hook in another process, as VMQ does
       Task.start(Plugin, :on_client_gone, [{:dontcare, @device_base_path}])
 
-      # Make sure messages were received
-      Process.sleep(100)
+      # First, disconnection is received...
+      receive do
+        disconnect_message ->
+          assert {:amqp_msg, "",
+                  %{
+                    headers: disconnection_headers,
+                    timestamp: disconnection_timestamp,
+                    message_id: disconnection_message_id
+                  }} = disconnect_message
 
-      # Disconnection is received before connection
-      assert {:messages, [disconnect_message, reconnect_message]} =
-               Process.info(self(), :messages)
+          assert %{
+                   "x_astarte_vmqamqp_proto_ver" => 1,
+                   "x_astarte_msg_type" => "disconnection",
+                   "x_astarte_realm" => @realm,
+                   "x_astarte_device_id" => @device_id
+                 } = amqp_headers_to_map(disconnection_headers)
 
-      assert {:amqp_msg, "",
-              %{
-                headers: disconnection_headers,
-                timestamp: disconnection_timestamp,
-                message_id: disconnection_message_id
-              }} = disconnect_message
+          assert String.starts_with?(
+                   disconnection_message_id,
+                   message_id_prefix(@realm, @device_id, disconnection_timestamp)
+                 )
+      after
+        1_000 -> flunk("Expected disconnection message, did not receive any.")
+      end
 
-      assert %{
-               "x_astarte_vmqamqp_proto_ver" => 1,
-               "x_astarte_msg_type" => "disconnection",
-               "x_astarte_realm" => @realm,
-               "x_astarte_device_id" => @device_id
-             } = amqp_headers_to_map(disconnection_headers)
+      # ... and only after, reconnection
+      receive do
+        reconnect_message ->
+          assert {:amqp_msg, "",
+                  %{
+                    headers: connection_headers,
+                    timestamp: connection_timestamp,
+                    message_id: connection_message_id
+                  }} = reconnect_message
 
-      assert String.starts_with?(
-               disconnection_message_id,
-               message_id_prefix(@realm, @device_id, disconnection_timestamp)
-             )
+          assert %{
+                   "x_astarte_vmqamqp_proto_ver" => 1,
+                   "x_astarte_msg_type" => "connection",
+                   "x_astarte_realm" => @realm,
+                   "x_astarte_device_id" => @device_id,
+                   "x_astarte_remote_ip" => "2.3.4.5"
+                 } = amqp_headers_to_map(connection_headers)
 
-      assert {:amqp_msg, "",
-              %{
-                headers: connection_headers,
-                timestamp: connection_timestamp,
-                message_id: connection_message_id
-              }} = reconnect_message
-
-      assert %{
-               "x_astarte_vmqamqp_proto_ver" => 1,
-               "x_astarte_msg_type" => "connection",
-               "x_astarte_realm" => @realm,
-               "x_astarte_device_id" => @device_id,
-               "x_astarte_remote_ip" => "2.3.4.5"
-             } = amqp_headers_to_map(connection_headers)
-
-      assert String.starts_with?(
-               connection_message_id,
-               message_id_prefix(@realm, @device_id, connection_timestamp)
-             )
+          assert String.starts_with?(
+                   connection_message_id,
+                   message_id_prefix(@realm, @device_id, connection_timestamp)
+                 )
+      after
+        1_000 -> flunk("Expected connection message, did not receive any.")
+      end
     end
 
     test "when on_client_offline is called before on_register" do
@@ -627,51 +638,56 @@ defmodule Astarte.VMQ.PluginTest do
         :dontcare
       ])
 
-      # Make sure messages were received
-      Process.sleep(100)
+      # First, disconnection is received...
+      receive do
+        disconnect_message ->
+          assert {:amqp_msg, "",
+                  %{
+                    headers: disconnection_headers,
+                    timestamp: disconnection_timestamp,
+                    message_id: disconnection_message_id
+                  }} = disconnect_message
 
-      # Disconnection is received before connection
-      assert {:messages, [disconnect_message, reconnect_message]} =
-               Process.info(self(), :messages)
+          assert %{
+                   "x_astarte_vmqamqp_proto_ver" => 1,
+                   "x_astarte_msg_type" => "disconnection",
+                   "x_astarte_realm" => @realm,
+                   "x_astarte_device_id" => @device_id
+                 } = amqp_headers_to_map(disconnection_headers)
 
-      assert {:amqp_msg, "",
-              %{
-                headers: disconnection_headers,
-                timestamp: disconnection_timestamp,
-                message_id: disconnection_message_id
-              }} = disconnect_message
+          assert String.starts_with?(
+                   disconnection_message_id,
+                   message_id_prefix(@realm, @device_id, disconnection_timestamp)
+                 )
+      after
+        1_000 -> flunk("Expected disconnection message, did not receive any.")
+      end
 
-      assert %{
-               "x_astarte_vmqamqp_proto_ver" => 1,
-               "x_astarte_msg_type" => "disconnection",
-               "x_astarte_realm" => @realm,
-               "x_astarte_device_id" => @device_id
-             } = amqp_headers_to_map(disconnection_headers)
+      # ... and only after, reconnection
+      receive do
+        reconnect_message ->
+          assert {:amqp_msg, "",
+                  %{
+                    headers: connection_headers,
+                    timestamp: connection_timestamp,
+                    message_id: connection_message_id
+                  }} = reconnect_message
 
-      assert String.starts_with?(
-               disconnection_message_id,
-               message_id_prefix(@realm, @device_id, disconnection_timestamp)
-             )
+          assert %{
+                   "x_astarte_vmqamqp_proto_ver" => 1,
+                   "x_astarte_msg_type" => "connection",
+                   "x_astarte_realm" => @realm,
+                   "x_astarte_device_id" => @device_id,
+                   "x_astarte_remote_ip" => "2.3.4.5"
+                 } = amqp_headers_to_map(connection_headers)
 
-      assert {:amqp_msg, "",
-              %{
-                headers: connection_headers,
-                timestamp: connection_timestamp,
-                message_id: connection_message_id
-              }} = reconnect_message
-
-      assert %{
-               "x_astarte_vmqamqp_proto_ver" => 1,
-               "x_astarte_msg_type" => "connection",
-               "x_astarte_realm" => @realm,
-               "x_astarte_device_id" => @device_id,
-               "x_astarte_remote_ip" => "2.3.4.5"
-             } = amqp_headers_to_map(connection_headers)
-
-      assert String.starts_with?(
-               connection_message_id,
-               message_id_prefix(@realm, @device_id, connection_timestamp)
-             )
+          assert String.starts_with?(
+                   connection_message_id,
+                   message_id_prefix(@realm, @device_id, connection_timestamp)
+                 )
+      after
+        1_000 -> flunk("Expected connection message, did not receive any.")
+      end
     end
 
     test "when on_client_gone is called before on_register" do
@@ -687,51 +703,56 @@ defmodule Astarte.VMQ.PluginTest do
         :dontcare
       ])
 
-      # Make sure messages were received
-      Process.sleep(100)
+      # First, disconnection is received...
+      receive do
+        disconnect_message ->
+          assert {:amqp_msg, "",
+                  %{
+                    headers: disconnection_headers,
+                    timestamp: disconnection_timestamp,
+                    message_id: disconnection_message_id
+                  }} = disconnect_message
 
-      # Disconnection is received before connection
-      assert {:messages, [disconnect_message, reconnect_message]} =
-               Process.info(self(), :messages)
+          assert %{
+                   "x_astarte_vmqamqp_proto_ver" => 1,
+                   "x_astarte_msg_type" => "disconnection",
+                   "x_astarte_realm" => @realm,
+                   "x_astarte_device_id" => @device_id
+                 } = amqp_headers_to_map(disconnection_headers)
 
-      assert {:amqp_msg, "",
-              %{
-                headers: disconnection_headers,
-                timestamp: disconnection_timestamp,
-                message_id: disconnection_message_id
-              }} = disconnect_message
+          assert String.starts_with?(
+                   disconnection_message_id,
+                   message_id_prefix(@realm, @device_id, disconnection_timestamp)
+                 )
+      after
+        1_000 -> flunk("Expected disconnection message, did not receive any.")
+      end
 
-      assert %{
-               "x_astarte_vmqamqp_proto_ver" => 1,
-               "x_astarte_msg_type" => "disconnection",
-               "x_astarte_realm" => @realm,
-               "x_astarte_device_id" => @device_id
-             } = amqp_headers_to_map(disconnection_headers)
+      # ... and only after, reconnection
+      receive do
+        reconnect_message ->
+          assert {:amqp_msg, "",
+                  %{
+                    headers: connection_headers,
+                    timestamp: connection_timestamp,
+                    message_id: connection_message_id
+                  }} = reconnect_message
 
-      assert String.starts_with?(
-               disconnection_message_id,
-               message_id_prefix(@realm, @device_id, disconnection_timestamp)
-             )
+          assert %{
+                   "x_astarte_vmqamqp_proto_ver" => 1,
+                   "x_astarte_msg_type" => "connection",
+                   "x_astarte_realm" => @realm,
+                   "x_astarte_device_id" => @device_id,
+                   "x_astarte_remote_ip" => "2.3.4.5"
+                 } = amqp_headers_to_map(connection_headers)
 
-      assert {:amqp_msg, "",
-              %{
-                headers: connection_headers,
-                timestamp: connection_timestamp,
-                message_id: connection_message_id
-              }} = reconnect_message
-
-      assert %{
-               "x_astarte_vmqamqp_proto_ver" => 1,
-               "x_astarte_msg_type" => "connection",
-               "x_astarte_realm" => @realm,
-               "x_astarte_device_id" => @device_id,
-               "x_astarte_remote_ip" => "2.3.4.5"
-             } = amqp_headers_to_map(connection_headers)
-
-      assert String.starts_with?(
-               connection_message_id,
-               message_id_prefix(@realm, @device_id, connection_timestamp)
-             )
+          assert String.starts_with?(
+                   connection_message_id,
+                   message_id_prefix(@realm, @device_id, connection_timestamp)
+                 )
+      after
+        1_000 -> flunk("Expected connection message, did not receive any.")
+      end
     end
   end
 

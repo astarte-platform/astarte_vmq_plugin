@@ -4,7 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [1.1.0-rc.0] - 2023-06-09
+### Changed
+- Use the `internal` event type for device heartbeat.
+- Update Elixir to 1.14.5 and Erlang/OTP to 25.3.2.
+
+## [1.1.0-alpha.0] - 2022-11-24
 ### Fixed
 - Correctly serialize disconnection/reconnection events if VerneMQ hooks are called in
   the wrong order. Fix https://github.com/astarte-platform/astarte/issues/668.

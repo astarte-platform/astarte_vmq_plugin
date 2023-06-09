@@ -224,9 +224,10 @@ defmodule Astarte.VMQ.Plugin do
   end
 
   defp publish_heartbeat(realm, device_id) do
+    additional_headers = [x_astarte_internal_path: "/heartbeat"]
     timestamp = now_us_x10_timestamp()
 
-    publish(realm, device_id, "", "heartbeat", timestamp)
+    publish(realm, device_id, "", "internal", timestamp, additional_headers)
   end
 
   defp publish(realm, device_id, payload, event_string, timestamp, additional_headers \\ []) do

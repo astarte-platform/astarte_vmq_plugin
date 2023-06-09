@@ -1,22 +1,20 @@
-# Build with Elixir 1.11.3/OTP 23
-FROM elixir:1.11.4 as builder
+FROM hexpm/elixir:1.14.5-erlang-25.3.2-debian-bullseye-20230522-slim as builder
+
+# install build dependencies
+# --allow-releaseinfo-change allows to pull from 'oldstable'
+RUN apt-get update --allow-releaseinfo-change -y \
+  && apt-get install -y build-essential git curl \
+  && apt-get clean && rm -f /var/lib/apt/lists/*_*
 
 WORKDIR /build
 
-# Needed for VerneMQ 1.11.0
-RUN apt-get -qq update && apt-get -qq install libsnappy-dev
+# Needed for VerneMQ 1.13.0
+RUN apt-get -qq update && apt-get -qq install libsnappy-dev libssl-dev
 
 # Let's start by building VerneMQ
-# VerneMQ 1.11.0 uses git protocol, but it's no more supported by Github.
-# See https://github.blog/2021-09-01-improving-git-protocol-security-github/
-RUN git config --global url.https://.insteadOf git://
-
-RUN git clone https://github.com/vernemq/vernemq.git -b 1.11.0
-
-COPY docker/patches/increase_ssl_handshake_timeout.patch /build/vernemq/
+RUN git clone https://github.com/vernemq/vernemq.git -b 1.13.0
 
 RUN cd vernemq && \
-  git apply increase_ssl_handshake_timeout.patch && \
   make rel && \
   cd ..
 
@@ -57,7 +55,7 @@ COPY docker/bin/vernemq.sh /build/vernemq/_build/default/rel/vernemq/bin/
 RUN chmod +x /build/vernemq/_build/default/rel/vernemq/bin/vernemq.sh
 
 # Note: it is important to keep Debian versions in sync, or incompatibilities between libcrypto will happen
-FROM debian:buster-slim
+FROM debian:bullseye-slim
 
 # Set the locale
 ENV LANG C.UTF-8

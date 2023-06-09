@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-use Mix.Config
+import Config
 
 # lager is used by rabbit_common.
 # Silent it by setting the higher loglevel.
