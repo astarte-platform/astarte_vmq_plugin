@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Correctly serialize disconnection/reconnection events if VerneMQ hooks are called in
   the wrong order. Fix https://github.com/astarte-platform/astarte/issues/668.
 
+## [1.0.5] - 2023-09-25
+
 ## [1.0.4] - 2022-09-26
 ### Fixed
 - Do not let VerneMQ container start unless the CA cert is retrieved from CFSSL.
