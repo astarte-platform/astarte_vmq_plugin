@@ -1,7 +1,7 @@
 #
 # This file is part of Astarte.
 #
-# Copyright 2017 Ispirata Srl
+# Copyright 2017 - 2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -51,6 +51,21 @@ defmodule Astarte.VMQ.Plugin.ConfigTest do
 
     on_exit(fn ->
       Application.put_env(:astarte_vmq_plugin, :data_queue_prefix, old_data_queue_prefix)
+    end)
+  end
+
+  test "config init correctly converts cassandra_nodes to elixir string" do
+    erlang_cassandra_nodes = ['something']
+
+    elixir_cassandra_nodes = ["something"]
+
+    Application.put_env(:astarte_vmq_plugin, :cassandra_nodes, erlang_cassandra_nodes)
+    Config.init()
+
+    assert elixir_cassandra_nodes == Config.xandra_options!()[:nodes]
+
+    on_exit(fn ->
+      Application.put_env(:astarte_vmq_plugin, :data_queue_prefix, elixir_cassandra_nodes)
     end)
   end
 end

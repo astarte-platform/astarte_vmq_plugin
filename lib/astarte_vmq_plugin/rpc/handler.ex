@@ -1,7 +1,7 @@
 #
 # This file is part of Astarte.
 #
-# Copyright 2018 Ispirata Srl
+# Copyright 2018 - 2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ defmodule Astarte.VMQ.Plugin.RPC.Handler do
 
   alias Astarte.RPC.Protocol.VMQ.Plugin.{
     Call,
+    Delete,
     Disconnect,
     GenericErrorReply,
     GenericOkReply,
@@ -67,6 +68,15 @@ defmodule Astarte.VMQ.Plugin.RPC.Handler do
       {:error, reason} ->
         generic_error(reason)
     end
+  end
+
+  defp call_rpc({:delete, %Delete{realm_name: realm_name, device_id: device_id}}) do
+    client_id = "#{realm_name}/#{device_id}"
+    # Either the client has been deleted or it is :not_found,
+    # which means that there is no session anyway.
+    Plugin.disconnect_client(client_id, true)
+    Plugin.ack_device_deletion(realm_name, device_id)
+    generic_ok()
   end
 
   defp call_rpc({:publish, %Publish{topic_tokens: []}}) do

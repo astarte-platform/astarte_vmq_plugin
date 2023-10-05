@@ -1,7 +1,7 @@
 #
 # This file is part of Astarte.
 #
-# Copyright 2017 Ispirata Srl
+# Copyright 2017 - 2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -37,6 +37,24 @@ defmodule Astarte.VMQ.Plugin.Config do
       |> init_ssl_options()
 
     Application.put_env(:astarte_vmq_plugin, :amqp_options, amqp_opts)
+
+    cassandra_nodes =
+      Application.get_env(:astarte_vmq_plugin, :cassandra_nodes, ["localhost:9042"])
+      |> normalize_cassandra_nodes()
+
+    Application.put_env(:astarte_vmq_plugin, :cassandra_nodes, cassandra_nodes)
+
+    cassandra_ssl_custom_sni =
+      Application.get_env(:astarte_vmq_plugin, :cassandra_ssl_custom_sni, "")
+      |> to_string()
+
+    Application.put_env(:astarte_vmq_plugin, :cassandra_ssl_custom_sni, cassandra_ssl_custom_sni)
+
+    cassandra_ssl_ca_file =
+      Application.get_env(:astarte_vmq_plugin, :cassandra_ssl_ca_file, CAStore.file_path())
+      |> to_string()
+
+    Application.put_env(:astarte_vmq_plugin, :cassandra_ssl_ca_file, cassandra_ssl_ca_file)
 
     data_queue_prefix =
       Application.get_env(:astarte_vmq_plugin, :data_queue_prefix, "astarte_data_")
@@ -147,6 +165,47 @@ defmodule Astarte.VMQ.Plugin.Config do
     )
   end
 
+  def xandra_authentication_options do
+    password_auth_opts = [
+      username:
+        Application.get_env(:astarte_vmq_plugin, :cassandra_username, "cassandra") |> to_string(),
+      password:
+        Application.get_env(:astarte_vmq_plugin, :cassandra_password, "cassandra") |> to_string()
+    ]
+
+    {Xandra.Authenticator.Password, password_auth_opts}
+  end
+
+  def xandra_options! do
+    # TODO handle SNI
+    [
+      nodes: Application.get_env(:astarte_vmq_plugin, :cassandra_nodes),
+      authentication: xandra_authentication_options(),
+      pool_size: Application.get_env(:astarte_vmq_plugin, :cassandra_pool_size, 10),
+      encryption: Application.get_env(:astarte_vmq_plugin, :cassandra_ssl_enabled, false),
+      name: :xandra
+    ]
+    |> populate_xandra_ssl_options!()
+  end
+
+  defp populate_xandra_ssl_options!(options) do
+    if Application.get_env(:astarte_vmq_plugin, :cassandra_ssl_enabled, false) do
+      ssl_options = build_xandra_ssl_options!()
+      Keyword.put(options, :transport_options, ssl_options)
+    else
+      options
+    end
+  end
+
+  defp build_xandra_ssl_options! do
+    [
+      cacertfile: Application.fetch_env!(:astarte_vmq_plugin, :cassandra_ssl_ca_file),
+      verify: :verify_peer,
+      depth: 10,
+      server_name_indication: :disable
+    ]
+  end
+
   defp normalize_opts_strings(amqp_options) do
     Enum.map(amqp_options, fn
       {:username, value} -> {:username, to_string(value)}
@@ -155,5 +214,11 @@ defmodule Astarte.VMQ.Plugin.Config do
       {:host, value} -> {:host, to_string(value)}
       other -> other
     end)
+  end
+
+  defp normalize_cassandra_nodes(nodes) when is_list(nodes) do
+    nodes
+    # convert from Erlang strings to Elixir strings
+    |> Enum.map(&to_string/1)
   end
 end

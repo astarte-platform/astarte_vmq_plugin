@@ -1,7 +1,7 @@
 #
 # This file is part of Astarte.
 #
-# Copyright 2017 Ispirata Srl
+# Copyright 2017 - 2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,11 +23,13 @@ defmodule Astarte.VMQ.PluginTest do
   alias AMQP.{Channel, Connection, Queue}
   alias Astarte.VMQ.Plugin
   alias Astarte.VMQ.Plugin.Config
+  alias Astarte.VMQ.Plugin.DatabaseTestHelper
 
   @device_id :crypto.strong_rand_bytes(16) |> Base.url_encode64(padding: false)
   @other_device_id :crypto.strong_rand_bytes(16) |> Base.url_encode64(padding: false)
   @realm "test"
   @device_base_path "#{@realm}/#{@device_id}"
+  @other_device_base_path "#{@realm}/#{@other_device_id}"
   @other_mqtt_user "other"
   @another_mqtt_user "another"
   @queue_name "#{Config.data_queue_prefix()}0"
@@ -37,6 +39,9 @@ defmodule Astarte.VMQ.PluginTest do
     {:ok, conn} = Connection.open(amqp_opts)
     {:ok, chan} = Channel.open(conn)
     Queue.declare(chan, @queue_name)
+    :ok = DatabaseTestHelper.await_xandra_cluster_connected!()
+    DatabaseTestHelper.setup_db!()
+    on_exit(&DatabaseTestHelper.teardown_db!/0)
     {:ok, chan: chan}
   end
 
@@ -55,28 +60,60 @@ defmodule Astarte.VMQ.PluginTest do
     :ok
   end
 
-  test "auth_on_register for a device" do
-    assert {:ok, modifiers} =
-             Plugin.auth_on_register(
-               :dontcare,
-               {"/", :dontcare},
-               @device_base_path,
-               :dontcare,
-               :dontcare
-             )
+  describe "auth_on_register" do
+    test "for an existing device succeeds" do
+      DatabaseTestHelper.insert_device_into_devices!(@device_id)
 
-    assert Keyword.get(modifiers, :subscriber_id) == {"/", @device_base_path}
-  end
+      assert {:ok, modifiers} =
+               Plugin.auth_on_register(
+                 :dontcare,
+                 {"/", :dontcare},
+                 @device_base_path,
+                 :dontcare,
+                 :dontcare
+               )
 
-  test "auth_on_register for non-devices" do
-    assert :next =
-             Plugin.auth_on_register(
-               :dontcare,
-               {"/", :dontcare},
-               @other_mqtt_user,
-               :dontcare,
-               :dontcare
-             )
+      assert Keyword.get(modifiers, :subscriber_id) == {"/", @device_base_path}
+      DatabaseTestHelper.cleanup_db!()
+    end
+
+    test "for a non-existing device fails" do
+      assert {:error, :device_does_not_exist} =
+               Plugin.auth_on_register(
+                 :dontcare,
+                 {"/", :dontcare},
+                 @other_device_base_path,
+                 :dontcare,
+                 :dontcare
+               )
+    end
+
+    test "for an existing device that's being deleted fails" do
+      DatabaseTestHelper.insert_device_into_devices!(@other_device_id)
+      DatabaseTestHelper.insert_device_into_deletion_in_progress!(@other_device_id)
+
+      assert {:error, :device_deletion_in_progress} =
+               Plugin.auth_on_register(
+                 :dontcare,
+                 {"/", :dontcare},
+                 @other_device_base_path,
+                 :dontcare,
+                 :dontcare
+               )
+
+      DatabaseTestHelper.cleanup_db!()
+    end
+
+    test "ignores non-devices" do
+      assert :next =
+               Plugin.auth_on_register(
+                 :dontcare,
+                 {"/", :dontcare},
+                 @other_mqtt_user,
+                 :dontcare,
+                 :dontcare
+               )
+    end
   end
 
   test "partially authorized auth_on_subscribe for devices" do
