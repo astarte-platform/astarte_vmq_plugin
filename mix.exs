@@ -78,7 +78,7 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
 
   defp astarte_required_modules(_) do
     [
-      {:astarte_rpc, github: "Annopaolo/astarte_rpc", branch: "delete-device"},
+      {:astarte_rpc, github: "astarte-platform/astarte_rpc"},
       {:astarte_core, github: "astarte-platform/astarte_core"}
     ]
   end
