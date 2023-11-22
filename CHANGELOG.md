@@ -27,6 +27,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   Inflight messages are discarded. After deletion, a device must be
   registered again in order to connect to Astarte.
 
+### Changed
+- Update Elixir to 1.15.7.
+
 ## [1.1.0] - 2023-06-20
 
 ## [1.1.0-rc.0] - 2023-06-09

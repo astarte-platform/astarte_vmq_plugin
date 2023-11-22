@@ -22,7 +22,7 @@ defmodule Astarte.VMQ.Plugin.ConfigTest do
   alias Astarte.VMQ.Plugin.Config
 
   test "config init correctly converts amqp_options to elixir strings" do
-    opts = [username: 'user', password: 'password', virtual_host: '/']
+    opts = [username: ~c"user", password: ~c"password", virtual_host: ~c"/"]
 
     old_opts = Config.amqp_options()
 
@@ -40,7 +40,7 @@ defmodule Astarte.VMQ.Plugin.ConfigTest do
   end
 
   test "config init correctly converts data_queue_prefix to elixir string" do
-    data_queue_prefix = 'test_erlang_str'
+    data_queue_prefix = ~c"test_erlang_str"
 
     old_data_queue_prefix = Config.data_queue_prefix()
 
@@ -55,7 +55,7 @@ defmodule Astarte.VMQ.Plugin.ConfigTest do
   end
 
   test "config init correctly converts cassandra_nodes to elixir string" do
-    erlang_cassandra_nodes = ['something']
+    erlang_cassandra_nodes = [~c"something"]
 
     elixir_cassandra_nodes = ["something"]
 

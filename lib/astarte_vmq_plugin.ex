@@ -93,7 +93,7 @@ defmodule Astarte.VMQ.Plugin do
         []
       end
 
-    mountpoint = ''
+    mountpoint = ~c""
     subscriber_id = {mountpoint, client_id}
 
     case :vernemq_dev_api.disconnect_by_subscriber_id(subscriber_id, opts) do

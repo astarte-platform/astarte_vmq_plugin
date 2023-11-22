@@ -23,7 +23,7 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
     [
       app: :astarte_vmq_plugin,
       version: "1.2.0-dev",
-      elixir: "~> 1.14",
+      elixir: "~> 1.15",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       test_coverage: [tool: ExCoveralls],
@@ -78,7 +78,7 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
 
   defp astarte_required_modules(_) do
     [
-      {:astarte_rpc, github: "Annopaolo/astarte_rpc", branch: "delete-device"},
+      {:astarte_rpc, github: "astarte-platform/astarte_rpc"},
       {:astarte_core, github: "astarte-platform/astarte_core"}
     ]
   end
