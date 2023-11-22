@@ -18,12 +18,6 @@
 
 import Config
 
-# lager is used by rabbit_common.
-# Silent it by setting the higher loglevel.
-config :lager,
-  error_logger_redirect: false,
-  handlers: [level: :critical]
-
 config :astarte_vmq_plugin, :amqp_options, host: System.get_env("RABBITMQ_HOST") || "rabbitmq"
 
 config :logger, :console,

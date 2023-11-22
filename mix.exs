@@ -41,7 +41,7 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:lager, :logger, :amqp],
+      extra_applications: [:logger],
       mod: {Astarte.VMQ.Plugin.Application, []},
       env: [
         vmq_plugin_hooks: [
@@ -86,7 +86,7 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:amqp, "~> 2.1"},
+      {:amqp, "~> 3.3"},
       {:vernemq_dev, github: "vernemq/vernemq_dev"},
       {:excoveralls, "~> 0.15", only: :test},
       {:pretty_log, "~> 0.1"},
