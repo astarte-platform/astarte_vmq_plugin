@@ -29,6 +29,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 - Update Elixir to 1.15.7.
+- Update Erlang/OTP to 26.1.
+- Update VerneMQ to master (1cc57fa) to support OTP 26.
 
 ## [1.1.0] - 2023-06-20
 

@@ -20,7 +20,4 @@
 # and its dependencies with the aid of the Mix.Config module.
 import Config
 
-config :lager,
-  handlers: [level: :critical]
-
 import_config "#{config_env()}.exs"

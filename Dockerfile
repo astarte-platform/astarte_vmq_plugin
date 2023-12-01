@@ -1,4 +1,4 @@
-FROM hexpm/elixir:1.15.7-erlang-25.3.2.7-debian-bullseye-20231009-slim as builder
+FROM hexpm/elixir:1.15.5-erlang-26.1-debian-bullseye-20230612-slim as builder
 
 # install build dependencies
 # --allow-releaseinfo-change allows to pull from 'oldstable'
@@ -12,9 +12,11 @@ WORKDIR /build
 RUN apt-get -qq update && apt-get -qq install libsnappy-dev libssl-dev
 
 # Let's start by building VerneMQ
-RUN git clone https://github.com/vernemq/vernemq.git -b 1.13.0
+RUN git clone https://github.com/vernemq/vernemq.git
 
 RUN cd vernemq && \
+  # Check out latest master
+  git checkout 1cc57fa60f50b57784f2b56f79e09d5748aa90f7 && \
   make rel && \
   cd ..
 
