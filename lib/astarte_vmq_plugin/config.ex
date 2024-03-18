@@ -157,6 +157,10 @@ defmodule Astarte.VMQ.Plugin.Config do
     Application.get_env(:astarte_vmq_plugin, :registry_mfa)
   end
 
+  def astarte_instance_id do
+    Application.get_env(:astarte_vmq_plugin, :astarte_instance_id, "") |> to_string()
+  end
+
   def device_heartbeat_interval_ms do
     Application.get_env(
       :astarte_vmq_plugin,
