@@ -161,6 +161,7 @@
   end}.
   
 {mapping, "astarte_vmq_plugin.astarte_instance_id", "astarte_vmq_plugin.astarte_instance_id", [
-    {default, "default"},
+    {default, ""},
     {datatype, string}
   ]}.
+  
