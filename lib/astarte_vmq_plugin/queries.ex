@@ -21,6 +21,8 @@ defmodule Astarte.VMQ.Plugin.Queries do
 
   alias Astarte.Core.Device
   alias Astarte.Core.Realm
+  alias Astarte.Core.CQLUtils
+  alias Astarte.VMQ.Plugin.Config
 
   @doc """
   Checks whether a device row exists in Astarte database (i.e. it has at least been registered).
@@ -130,8 +132,11 @@ defmodule Astarte.VMQ.Plugin.Queries do
   end
 
   defp use_realm(conn, realm) when is_binary(realm) do
+    keyspace_name =
+      CQLUtils.realm_name_to_keyspace_name(realm, Config.astarte_instance_id())
+
     with :ok <- verify_realm(realm),
-         {:ok, %Xandra.SetKeyspace{}} <- Xandra.execute(conn, "USE #{realm}") do
+         {:ok, %Xandra.SetKeyspace{}} <- Xandra.execute(conn, "USE #{keyspace_name}") do
       :ok
     end
   end

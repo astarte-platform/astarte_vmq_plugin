@@ -20,23 +20,27 @@ defmodule Astarte.VMQ.Plugin.DatabaseTestHelper do
   require Logger
   alias Astarte.Core.Device
   import ExUnit.Assertions
+  alias Astarte.Core.CQLUtils
+  alias Astarte.VMQ.Plugin.Config
+
+  @test_keyspace CQLUtils.realm_name_to_keyspace_name("test", Config.astarte_instance_id())
 
   @create_test_keyspace """
-    CREATE KEYSPACE test
+    CREATE KEYSPACE  #{@test_keyspace}
       WITH
         replication = {'class': 'SimpleStrategy', 'replication_factor': '1'} AND
         durable_writes = true;
   """
 
   @create_devices_table """
-  CREATE TABLE test.devices (
+  CREATE TABLE #{@test_keyspace}.devices (
     device_id uuid,
     PRIMARY KEY (device_id)
   );
   """
 
   @create_deletion_in_progress_table """
-  CREATE TABLE test.deletion_in_progress (
+  CREATE TABLE #{@test_keyspace}.deletion_in_progress (
     device_id uuid,
     vmq_ack boolean,
     PRIMARY KEY (device_id)
@@ -44,25 +48,25 @@ defmodule Astarte.VMQ.Plugin.DatabaseTestHelper do
   """
 
   @insert_device_into_devices """
-    INSERT INTO test.devices (device_id)
+    INSERT INTO #{@test_keyspace}.devices (device_id)
       VALUES (:device_id);
   """
 
   @insert_device_into_deletion_in_progress """
-    INSERT INTO test.deletion_in_progress (device_id, vmq_ack)
+    INSERT INTO #{@test_keyspace}.deletion_in_progress (device_id, vmq_ack)
       VALUES (:device_id, :vmq_ack);
   """
 
   @truncate_devices_table """
-  TRUNCATE test.devices;
+  TRUNCATE #{@test_keyspace}.devices;
   """
 
   @truncate_deletion_in_progress_table """
-  TRUNCATE test.deletion_in_progress;
+  TRUNCATE #{@test_keyspace}.deletion_in_progress;
   """
 
   @drop_test_keyspace """
-  DROP KEYSPACE test;
+  DROP KEYSPACE #{@test_keyspace};
   """
 
   def setup_db!() do
