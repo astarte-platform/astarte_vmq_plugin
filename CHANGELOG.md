@@ -26,6 +26,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   disconnected and not allowed to reconnect until deletion ends.
   Inflight messages are discarded. After deletion, a device must be
   registered again in order to connect to Astarte.
+- Added support for multiple Astarte instances sharing the same database,
+  the following env variable has been added:
+  - `DOCKER_VERNEMQ_ASTARTE_VMQ_PLUGIN__ASTARTE_INSTANCE_ID`
+  (defaults to ``)
 
 ### Changed
 - Update Elixir to 1.15.7.

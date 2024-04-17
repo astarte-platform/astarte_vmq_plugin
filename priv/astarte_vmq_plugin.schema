@@ -159,3 +159,9 @@
     Splitted = string:split(Nodes, ",", all),
     lists:map(fun(E) -> string:trim(E, both) end, Splitted)
   end}.
+  
+{mapping, "astarte_vmq_plugin.astarte_instance_id", "astarte_vmq_plugin.astarte_instance_id", [
+    {default, ""},
+    {datatype, string}
+  ]}.
+  
