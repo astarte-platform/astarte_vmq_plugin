@@ -76,7 +76,7 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
 
   defp astarte_required_modules(_) do
     [
-      {:astarte_rpc, "~> 1.0.5"}
+      {:astarte_rpc, "~> 1.0.6"}
     ]
   end
 
