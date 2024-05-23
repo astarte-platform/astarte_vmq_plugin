@@ -38,7 +38,7 @@ defmodule Astarte.VMQ.Plugin.Application do
 
     # List all child processes to be supervised
     children = [
-      Astarte.VMQ.Plugin.AMQPClient,
+      {Mississippi.Producer, Config.mississippi_opts!()},
       {Registry, keys: :unique, name: AstarteVMQPluginConnectionSynchronizer.Registry},
       Astarte.VMQ.Plugin.Connection.Synchronizer.Supervisor,
       {Astarte.VMQ.Plugin.Publisher, [Config.registry_mfa()]},

@@ -22,7 +22,6 @@ defmodule Astarte.VMQ.Plugin do
   """
 
   alias Astarte.VMQ.Plugin.Config
-  alias Astarte.VMQ.Plugin.AMQPClient
   alias Astarte.VMQ.Plugin.Connection.Synchronizer
   alias Astarte.VMQ.Plugin.Connection.Synchronizer.Supervisor, as: SynchronizerSupervisor
   alias Astarte.VMQ.Plugin.Queries
@@ -246,15 +245,20 @@ defmodule Astarte.VMQ.Plugin do
       ] ++ additional_headers
 
     message_id = generate_message_id(realm, device_id, timestamp)
-    sharding_key = {realm, device_id}
 
-    :ok =
-      AMQPClient.publish(payload,
-        headers: headers,
-        message_id: message_id,
-        timestamp: timestamp,
-        sharding_key: sharding_key
-      )
+    {:ok, decoded_device_id} =
+      Astarte.Core.Device.decode_device_id(device_id, allow_extended_id: true)
+
+    sharding_key = {realm, decoded_device_id}
+
+    publish_opts = [
+      headers: headers,
+      message_id: message_id,
+      timestamp: timestamp,
+      sharding_key: sharding_key
+    ]
+
+    :ok = Mississippi.Producer.EventsProducer.publish(payload, publish_opts)
   end
 
   defp now_us_x10_timestamp do
