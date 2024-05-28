@@ -36,6 +36,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Update Erlang/OTP to 26.1.
 - Update VerneMQ to master (1cc57fa) to support OTP 26.
 
+## [1.1.1] - 2023-10-03
+
 ## [1.1.0] - 2023-06-20
 
 ## [1.1.0-rc.0] - 2023-06-09
@@ -47,6 +49,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Correctly serialize disconnection/reconnection events if VerneMQ hooks are called in
   the wrong order. Fix https://github.com/astarte-platform/astarte/issues/668.
+
+## [1.0.6] - 2024-04-18
+
+## [1.0.5] - 2023-09-25
 
 ## [1.0.4] - 2022-09-26
 ### Fixed
