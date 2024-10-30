@@ -89,6 +89,7 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
       {:amqp, "~> 3.3"},
       {:vernemq_dev, github: "vernemq/vernemq_dev"},
       {:excoveralls, "~> 0.15", only: :test},
+      {:mississippi, github: "secomind/mississippi"},
       {:pretty_log, "~> 0.1"},
       {:dialyxir, "~> 1.4", only: [:dev, :ci], runtime: false},
       {:xandra, "~> 0.14"}

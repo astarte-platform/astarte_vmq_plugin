@@ -32,29 +32,43 @@ defmodule Astarte.VMQ.PluginTest do
   @other_device_base_path "#{@realm}/#{@other_device_id}"
   @other_mqtt_user "other"
   @another_mqtt_user "another"
-  @queue_name "#{Config.data_queue_prefix()}0"
 
   setup_all do
     amqp_opts = Config.amqp_options()
     {:ok, conn} = Connection.open(amqp_opts)
     {:ok, chan} = Channel.open(conn)
-    Queue.declare(chan, @queue_name)
+    queue_total = Config.mississippi_opts!()[:mississippi_config][:queues][:total_count]
+
+    queues =
+      for n <- 0..queue_total do
+        queue_name = "#{Config.data_queue_prefix()}#{n}"
+        {:ok, _} = Queue.declare(chan, queue_name, durable: true)
+        queue_name
+      end
+
     :ok = DatabaseTestHelper.await_xandra_cluster_connected!()
     DatabaseTestHelper.setup_db!()
     on_exit(&DatabaseTestHelper.teardown_db!/0)
-    {:ok, chan: chan}
+    {:ok, chan: chan, queues: queues}
   end
 
-  setup %{chan: chan} do
+  setup %{chan: chan, queues: queues} do
     test_pid = self()
 
-    {:ok, consumer_tag} =
-      Queue.subscribe(chan, @queue_name, fn payload, meta ->
-        send(test_pid, {:amqp_msg, payload, meta})
-      end)
+    consumer_tags =
+      for queue <- queues do
+        {:ok, consumer_tag} =
+          Queue.subscribe(chan, queue, fn payload, meta ->
+            send(test_pid, {:amqp_msg, payload, meta})
+          end)
+
+        consumer_tag
+      end
 
     on_exit(fn ->
-      Queue.unsubscribe(chan, consumer_tag)
+      Enum.each(consumer_tags, fn consumer_tag ->
+        Queue.unsubscribe(chan, consumer_tag)
+      end)
     end)
 
     :ok

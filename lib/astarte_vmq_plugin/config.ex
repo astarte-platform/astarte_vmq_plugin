@@ -153,6 +153,19 @@ defmodule Astarte.VMQ.Plugin.Config do
     Application.get_env(:astarte_vmq_plugin, :mirror_queue_name)
   end
 
+  def mississippi_opts! do
+    [
+      amqp_producer_options: amqp_options(),
+      mississippi_config: [
+        queues: [
+          events_exchange_name: "",
+          total_count: data_queue_count(),
+          prefix: data_queue_prefix()
+        ]
+      ]
+    ]
+  end
+
   def registry_mfa do
     Application.get_env(:astarte_vmq_plugin, :registry_mfa)
   end
