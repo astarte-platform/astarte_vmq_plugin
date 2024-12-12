@@ -91,6 +91,7 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
       {:excoveralls, "~> 0.15", only: :test},
       {:mississippi, github: "secomind/mississippi"},
       {:pretty_log, "~> 0.1"},
+      {:flatlog, github: "annopaolo/flatlog"},
       {:dialyxir, "~> 1.4", only: [:dev, :ci], runtime: false},
       {:xandra, "~> 0.14"}
     ]

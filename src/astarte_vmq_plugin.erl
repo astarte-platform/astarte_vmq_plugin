@@ -28,6 +28,20 @@ start() ->
     % name as the application, which can't be an Elixir module due to naming
     % constraints.
     {ok, _} = application:ensure_all_started(astarte_vmq_plugin, permanent),
+    ok = logger:update_handler_config(default, #{level => info}),
+    ok = logger:set_handler_config(default, formatter, {flatlog,
+                                #{template =>
+                                ["level=", level, " "
+                                 "time=", time, " ",
+                                 "pid=", pid, " ",
+                                 "mfa=", mfa, " ",
+                                 "line=", line, " ",
+                                 {realm, ["realm=", realm], []}, " ",
+                                 {device_id, ["device_id=", device_id], []}, " ",
+                                 msg, "\n"
+                                ],
+                              single_line => true}
+                            }),
     ok.
 
 stop() ->
