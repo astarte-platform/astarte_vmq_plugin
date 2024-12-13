@@ -1,4 +1,4 @@
-FROM hexpm/elixir:1.15.5-erlang-26.1-debian-bullseye-20230612-slim as builder
+FROM hexpm/elixir:1.15.5-erlang-26.1-debian-bullseye-20230612-slim AS builder
 
 # install build dependencies
 # --allow-releaseinfo-change allows to pull from 'oldstable'
@@ -8,7 +8,7 @@ RUN apt-get update --allow-releaseinfo-change -y \
 
 WORKDIR /build
 
-# Needed for VerneMQ 1.13.0
+# TODO check if it's still needed for VerneMQ 2.0.1
 RUN apt-get -qq update && apt-get -qq install libsnappy-dev libssl-dev
 
 # Let's start by building VerneMQ
@@ -16,7 +16,7 @@ RUN git clone https://github.com/vernemq/vernemq.git
 
 RUN cd vernemq && \
   # Check out latest master
-  git checkout 1cc57fa60f50b57784f2b56f79e09d5748aa90f7 && \
+  git checkout -b v2.0.1 && \
   make rel && \
   cd ..
 
@@ -50,11 +50,9 @@ RUN cp astarte_vmq_plugin/priv/astarte_vmq_plugin.schema vernemq/_build/default/
 
 # Copy configuration files here - mainly because we want to keep the target image as small as possible
 # and avoid useless layers.
-COPY docker/files/vm.args /build/vernemq/_build/default/rel/vernemq/etc/
-COPY docker/files/vernemq.conf /build/vernemq/_build/default/rel/vernemq/etc/
-COPY docker/bin/rand_cluster_node.escript /build/vernemq/_build/default/rel/vernemq/bin/
-COPY docker/bin/vernemq.sh /build/vernemq/_build/default/rel/vernemq/bin/
-RUN chmod +x /build/vernemq/_build/default/rel/vernemq/bin/vernemq.sh
+COPY docker/files/vm.args vernemq/_build/default/rel/vernemq/etc/
+COPY docker/files/vernemq.conf vernemq/_build/default/rel/vernemq/etc/
+COPY docker/bin/rand_cluster_node.escript vernemq/_build/default/rel/vernemq/bin/
 
 # Note: it is important to keep Debian versions in sync, or incompatibilities between libcrypto will happen
 FROM debian:bullseye-slim
@@ -65,38 +63,44 @@ ENV LANG C.UTF-8
 # We have to redefine this here since it goes out of scope for each build stage
 ARG BUILD_ENV=prod
 
+# Install some VerneMQ scripts dependencies
+RUN apt-get -qq update && apt-get -qq install bash procps openssl iproute2 curl jq libsnappy-dev net-tools nano
+
 # We need SSL, curl, iproute2 and jq - and to ensure /etc/ssl/astarte
-RUN apt-get -qq update && apt-get -qq install libssl1.1 curl jq iproute2 netcat libsnappy1v5 && apt-get clean && mkdir -p /etc/ssl/astarte
+# TODO some of these might not be needed anymore
+RUN apt-get -qq update && apt-get -qq install libssl1.1 curl jq iproute2 netcat && apt-get clean && mkdir -p /etc/ssl/astarte
+
+ENV PATH="/opt/vernemq/bin:$PATH"
+
+COPY --from=builder /build/astarte_vmq_plugin/docker/bin/vernemq.sh /usr/sbin/start_vernemq
+COPY --from=builder /build/astarte_vmq_plugin/docker/bin/join_cluster.sh /usr/sbin/join_cluster
+
+RUN chmod +x /usr/sbin/start_vernemq
+RUN chmod +x /usr/sbin/join_cluster
 
 # Copy our built stuff (both are self-contained with their ERTS release)
 COPY --from=builder /build/vernemq/_build/default/rel/vernemq /opt/vernemq/
+
+RUN ln -s /opt/vernemq/etc /etc/vernemq && \
+    ln -s /opt/vernemq/data /var/lib/vernemq && \
+    ln -s /opt/vernemq/log /var/log/vernemq
+
 COPY --from=builder /build/astarte_vmq_plugin/_build/$BUILD_ENV/rel/astarte_vmq_plugin /opt/astarte_vmq_plugin/
 
-# Add the wait-for utility
-RUN cd /usr/bin && curl -O https://raw.githubusercontent.com/eficode/wait-for/master/wait-for && chmod +x wait-for && cd -
+# Ports
+# 1883  MQTT
+# 8883  MQTT/SSL
+# 8080  MQTT WebSockets
+# 44053 VerneMQ Message Distribution
+# 4369  EPMD - Erlang Port Mapper Daemon
+# 8888  Health, API, Prometheus Metrics
+# 9100 9101 9102 9103 9104 9105 9106 9107 9108 9109  Specific Distributed Erlang Port Range
 
-# MQTT
-EXPOSE 1883
+EXPOSE 1883 8883 8080 44053 4369 8888 \
+       9100 9101 9102 9103 9104 9105 9106 9107 9108 9109
 
-# MQTT for Reverse Proxy
-EXPOSE 1885
+VOLUME ["/opt/vernemq/log", "/opt/vernemq/data", "/opt/vernemq/etc"]
 
-# MQTT/SSL
-EXPOSE 8883
+HEALTHCHECK CMD vernemq ping | grep -q pong
 
-# VerneMQ Message Distribution
-EXPOSE 44053
-
-# EPMD - Erlang Port Mapper Daemon
-EXPOSE 4369
-
-# Specific Distributed Erlang Port Range
-EXPOSE 9100 9101 9102 9103 9104 9105 9106 9107 9108 9109
-
-# Prometheus Metrics
-EXPOSE 8888
-
-# Expose port for webroot ACME verification (in case)
-EXPOSE 80
-
-CMD ["/opt/vernemq/bin/vernemq.sh"]
+CMD ["start_vernemq"]
