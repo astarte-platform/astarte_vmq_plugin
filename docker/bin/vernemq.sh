@@ -281,8 +281,67 @@ EOF
     	
     configure_vernemq_listeners
 
-    # Add our plugin to conf
-    # TODO check if it is correct
+    # Add support for listening on 8883 with TLS
+    if env | grep -q "VERNEMQ_ENABLE_SSL_LISTENER"; then
+        # Populate SSL config
+        echo "listener.ssl.default = ${IP_ADDRESS}:8883" >> ${VERNEMQ_CONF_FILE}
+        echo "listener.ssl.cafile = /opt/vernemq/etc/ca.pem" >> ${VERNEMQ_CONF_FILE}
+        echo "listener.ssl.certfile = /opt/vernemq/etc/cert.pem" >> ${VERNEMQ_CONF_FILE}
+        echo "listener.ssl.keyfile = /opt/vernemq/etc/privkey.pem" >> ${VERNEMQ_CONF_FILE}
+        echo "listener.ssl.require_certificate = on" >> ${VERNEMQ_CONF_FILE}
+        echo "listener.ssl.use_identity_as_username = on" >> ${VERNEMQ_CONF_FILE}
+        echo "listener.ssl.tls_version = tlsv1.2" >> ${VERNEMQ_CONF_FILE}
+    fi
+
+    # Let's use obscure magic to do the right thing™
+    if env | grep -q "VERNEMQ_ENABLE_SSL_LISTENER"; then
+        # Let's do our magic. First of all, let's ask for certificates.
+        cacert=$(curl -s -d '{"label": "primary"}' -X POST $CFSSL_URL/api/v1/cfssl/info | jq -e -r ".result.certificate")
+        if [ -z "$cacert" ]; then
+            echo "Could not retrieve certificate from CFSSL at $CFSSL_URL , exiting"
+            exit 1
+        fi
+        echo "$cacert" > /etc/ssl/cfssl-ca-cert.crt
+        if env | grep -q "USE_LETSENCRYPT"; then
+            # TODO: Make this rotate in case we're using Let's encrypt
+            echo "You have chosen Let's encrypt as the deploy mechanism - this means clustering Verne is impossible!"
+            # Ensure certbot, first of all
+            echo 'deb http://ftp.debian.org/debian jessie-backports main' | tee /etc/apt/sources.list.d/backports.list
+            apt-get update
+            apt-get -qq install nginx-light
+            /etc/init.d/nginx start
+            if ! apt-get -qq install certbot -t jessie-backports; then
+                echo "Could not install certbot, exiting"
+                exit $?
+            fi
+            # Obtain certificate
+            if env | grep -q "LETSENCRYPT_STAGING"; then
+                echo "Using staging Let's Encrypt - certificate won't be valid!"
+                certbot_staging=--test-cert
+            fi
+            if ! certbot certonly -n $certbot_staging --webroot --webroot-path=/var/www/html --agree-tos --email $LETSENCRYPT_EMAIL --domains $LETSENCRYPT_DOMAINS; then
+                echo "Certbot failed, exiting"
+                exit $?
+            fi
+            /etc/init.d/nginx stop &
+            letsencrypt_dir=/etc/letsencrypt/live/${LETSENCRYPT_DOMAINS%,*}
+            # Then we copy our private key and certificate.
+            cp $letsencrypt_dir/privkey.pem /opt/vernemq/etc/privkey.pem || exit 1
+            cp $letsencrypt_dir/fullchain.pem /opt/vernemq/etc/cert.pem || exit 1
+            # And now we merge.
+            cat $letsencrypt_dir/fullchain.pem /etc/ssl/cfssl-ca-cert.crt > /opt/vernemq/etc/ca.pem
+        else
+            # Then we copy our private key and certificate. We assume there's a mount at /etc/ssl/vernemq-certs
+            cp /etc/ssl/vernemq-certs/privkey /opt/vernemq/etc/privkey.pem || exit 1
+            cp /etc/ssl/vernemq-certs/cert /opt/vernemq/etc/cert.pem || exit 1
+            # And now we merge.
+            cat /etc/ssl/vernemq-certs/cert /etc/ssl/cfssl-ca-cert.crt > /opt/vernemq/etc/ca.pem
+        fi
+    fi
+
+    configure_vernemq_listeners
+
+    # Add Astarte VerneMQ plugin
     echo "plugins.astarte_vmq_plugin = on" >> ${VERNEMQ_CONF_FILE}
     echo "plugins.astarte_vmq_plugin.path = /opt/astarte_vmq_plugin" >> ${VERNEMQ_CONF_FILE}
 
