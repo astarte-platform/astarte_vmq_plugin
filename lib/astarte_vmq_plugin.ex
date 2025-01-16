@@ -151,6 +151,9 @@ defmodule Astarte.VMQ.Plugin do
           control_path = "/" <> Enum.join(control_path_tokens, "/")
           publish_control_message(realm, device_id, control_path, payload, timestamp)
 
+        [^realm, ^device_id, "capabilities"] ->
+          publish_capabilities(realm, device_id, payload, timestamp)
+
         [^realm, ^device_id, interface | path_tokens] ->
           path = "/" <> Enum.join(path_tokens, "/")
           publish_data(realm, device_id, interface, path, payload, timestamp)
@@ -205,6 +208,10 @@ defmodule Astarte.VMQ.Plugin do
     additional_headers = [x_astarte_interface: interface, x_astarte_path: path]
 
     publish(realm, device_id, payload, "data", timestamp, additional_headers)
+  end
+
+  defp publish_capabilities(realm, device_id, payload, timestamp) do
+    publish(realm, device_id, payload, "capabilities", timestamp)
   end
 
   defp publish_control_message(realm, device_id, control_path, payload, timestamp) do

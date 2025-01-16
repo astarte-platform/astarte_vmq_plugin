@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   the following env variable has been added:
   - `DOCKER_VERNEMQ_ASTARTE_VMQ_PLUGIN__ASTARTE_INSTANCE_ID`
   (defaults to ``)
+- Added support for `capabilities` message topic at `/<realm name>/<device name>/capabilities`
 
 ### Changed
 - Update Elixir to 1.15.7.
