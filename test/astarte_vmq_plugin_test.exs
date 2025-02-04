@@ -422,6 +422,32 @@ defmodule Astarte.VMQ.PluginTest do
     assert String.starts_with?(message_id, message_id_prefix(@realm, @device_id, timestamp))
   end
 
+  test "device capabilities on_publish" do
+    payload = "payload"
+    capabilities_topic = [@realm, @device_id, "capabilities"]
+
+    Plugin.on_publish(
+      :dontcare,
+      {:dontcare, @device_base_path},
+      :dontcare,
+      capabilities_topic,
+      payload,
+      :dontcare
+    )
+
+    assert_receive {:amqp_msg, ^payload, %{headers: headers, timestamp: timestamp} = _metadata}
+
+    # 5 seconds
+    assert_in_delta timestamp, now_us_x10_timestamp(), 50_000_000
+
+    assert %{
+             "x_astarte_vmqamqp_proto_ver" => 1,
+             "x_astarte_msg_type" => "capabilities",
+             "x_astarte_realm" => @realm,
+             "x_astarte_device_id" => @device_id
+           } = amqp_headers_to_map(headers)
+  end
+
   test "device data on_publish" do
     path = "/some/data/path"
     interface = "com.my.Interface"
