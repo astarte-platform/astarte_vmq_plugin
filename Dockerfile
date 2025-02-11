@@ -1,4 +1,4 @@
-FROM hexpm/elixir:1.15.5-erlang-26.1-debian-bullseye-20230612-slim AS builder
+FROM --platform=${BUILDPLATFORM} hexpm/elixir:1.15.5-erlang-26.1-debian-bullseye-20230612-slim AS builder
 
 # install build dependencies
 # --allow-releaseinfo-change allows to pull from 'oldstable'
@@ -55,7 +55,7 @@ COPY docker/files/vernemq.conf vernemq/_build/default/rel/vernemq/etc/
 COPY docker/bin/rand_cluster_node.escript vernemq/_build/default/rel/vernemq/bin/
 
 # Note: it is important to keep Debian versions in sync, or incompatibilities between libcrypto will happen
-FROM debian:bullseye-slim
+FROM --platform=${BUILDPLATFORM} debian:bullseye-slim
 
 # Set the locale
 ENV LANG C.UTF-8
