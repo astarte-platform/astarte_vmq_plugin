@@ -1,7 +1,6 @@
 # GitHub recommends pinning actions to a commit SHA.
 # To get a newer version, you will need to update the SHA.
 # You can also reference a tag or branch, but the action may change without warning.
-
 name: Publish snapshot Docker images
 
 on:
@@ -14,8 +13,8 @@ on:
     - 'release-*'
 
 jobs:
-    build_and_test:
-    uses: ./github/workflows/build-workflow.yaml
+  build_and_test:
+    uses: ./.github/workflows/build-workflow.yaml
     secrets: inherit
 
   push_snapshot_to_registry:
