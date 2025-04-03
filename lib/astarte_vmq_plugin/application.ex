@@ -23,8 +23,6 @@ defmodule Astarte.VMQ.Plugin.Application do
 
   use Application
 
-  alias Astarte.VMQ.Plugin.RPC.Handler, as: RPCHandler
-  alias Astarte.RPC.Protocol.VMQ.Plugin, as: Protocol
   alias Astarte.VMQ.Plugin.Config
 
   require Logger
@@ -42,7 +40,8 @@ defmodule Astarte.VMQ.Plugin.Application do
       {Registry, keys: :unique, name: AstarteVMQPluginConnectionSynchronizer.Registry},
       Astarte.VMQ.Plugin.Connection.Synchronizer.Supervisor,
       {Astarte.VMQ.Plugin.Publisher, [Config.registry_mfa()]},
-      {Astarte.RPC.AMQP.Server, [amqp_queue: Protocol.amqp_queue(), handler: RPCHandler]},
+      {Horde.Registry, [name: Registry.VMQPluginRPC, keys: :unique, members: :auto]},
+      Astarte.VMQ.Plugin.RPC.Supervisor,
       {Xandra.Cluster, Config.xandra_options!()}
     ]
 
