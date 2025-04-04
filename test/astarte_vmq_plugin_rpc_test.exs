@@ -19,16 +19,7 @@
 defmodule Astarte.VMQ.Plugin.RPCTest do
   use ExUnit.Case
 
-  alias Astarte.RPC.Protocol.VMQ.Plugin.{
-    Call,
-    GenericErrorReply,
-    Publish,
-    PublishReply,
-    Reply
-  }
-
   alias Astarte.VMQ.Plugin.MockVerne
-  alias Astarte.VMQ.Plugin.RPC.Handler
 
   @topic ["some", "topic"]
   @payload "importantdata"
@@ -36,89 +27,46 @@ defmodule Astarte.VMQ.Plugin.RPCTest do
   setup_all do
     MockVerne.start_link()
 
-    :ok
+    %{
+      rpc_server: {:via, Horde.Registry, {Registry.VMQPluginRPC, :server}}
+    }
   end
 
-  test "invalid topic Publish call" do
-    serialized_call =
-      %Call{
-        version: 0,
-        call: {
-          :publish,
-          %Publish{
-            topic_tokens: [],
-            payload: @payload,
-            qos: 2
-          }
-        }
+  test "invalid topic Publish call", %{rpc_server: server} do
+    data =
+      %{
+        topic_tokens: [],
+        payload: @payload,
+        qos: 2
       }
-      |> Call.encode()
 
-    assert {:ok, ser_reply} = Handler.handle_rpc(serialized_call)
-
-    assert %Reply{
-             version: 0,
-             reply: {
-               :generic_error_reply,
-               %GenericErrorReply{error_name: "empty_topic_tokens"}
-             }
-           } = Reply.decode(ser_reply)
+    assert {:error, :empty_topic_tokens} = GenServer.call(server, {:publish, data})
 
     assert MockVerne.consume_message() == nil
   end
 
-  test "invalid qos Publish call" do
-    serialized_call =
-      %Call{
-        version: 0,
-        call: {
-          :publish,
-          %Publish{
-            topic_tokens: @topic,
-            payload: @payload,
-            qos: 42
-          }
-        }
+  test "invalid qos Publish call", %{rpc_server: server} do
+    data =
+      %{
+        topic_tokens: @topic,
+        payload: @payload,
+        qos: 42
       }
-      |> Call.encode()
 
-    assert {:ok, ser_reply} = Handler.handle_rpc(serialized_call)
-
-    assert %Reply{
-             version: 0,
-             reply: {
-               :generic_error_reply,
-               %GenericErrorReply{error_name: "invalid_qos"}
-             }
-           } = Reply.decode(ser_reply)
+    assert {:error, :invalid_qos} = GenServer.call(server, {:publish, data})
 
     assert MockVerne.consume_message() == nil
   end
 
-  test "valid Publish call" do
-    serialized_call =
-      %Call{
-        version: 0,
-        call: {
-          :publish,
-          %Publish{
-            topic_tokens: @topic,
-            payload: @payload,
-            qos: 2
-          }
-        }
+  test "valid Publish call", %{rpc_server: server} do
+    data =
+      %{
+        topic_tokens: @topic,
+        payload: @payload,
+        qos: 2
       }
-      |> Call.encode()
 
-    assert {:ok, ser_reply} = Handler.handle_rpc(serialized_call)
-
-    assert %Reply{
-             version: 0,
-             reply: {
-               :publish_reply,
-               %PublishReply{}
-             }
-           } = Reply.decode(ser_reply)
+    assert {:ok, _} = GenServer.call(server, {:publish, data})
 
     assert MockVerne.consume_message() == {@topic, @payload, %{qos: 2}}
   end
