@@ -3,6 +3,11 @@
 IP_ADDRESS=$(ip -4 addr show ${DOCKER_NET_INTERFACE:-eth0} | grep -oE '[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}' | sed -e "s/^[[:space:]]*//" | head -n 1)
 IP_ADDRESS=${DOCKER_IP_ADDRESS:-${IP_ADDRESS}}
 
+# Customize the Erlang cookie if specified
+if env | grep "RELEASE_COOKIE" -q; then
+    sed -i.bak -r "s/-setcookie vmq/-setcookie ${RELEASE_COOKIE}/" /opt/vernemq/etc/vm.args
+fi
+
 # Ensure the Erlang node name is set correctly
 if env | grep "DOCKER_VERNEMQ_NODENAME" -q; then
     sed -i.bak -r "s/-name VerneMQ@.+/-name VerneMQ@${DOCKER_VERNEMQ_NODENAME}/" /opt/vernemq/etc/vm.args
