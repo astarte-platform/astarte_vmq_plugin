@@ -90,6 +90,7 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
       {:vernemq_dev, github: "vernemq/vernemq_dev"},
       {:excoveralls, "~> 0.15", only: :test},
       {:pretty_log, "~> 0.1"},
+      {:horde, "~> 0.9"},
       {:dialyxir, "~> 1.4", only: [:dev, :ci], runtime: false},
       {:xandra, "~> 0.14"}
     ]
