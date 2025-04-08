@@ -29,9 +29,8 @@ defmodule Astarte.VMQ.Plugin.RPC.Supervisor do
     opts = [{:name, __MODULE__} | opts]
 
     with {:ok, pid} <- Horde.DynamicSupervisor.start_link(__MODULE__, init_arg, opts) do
-      case Horde.Registry.lookup(Registry.VMQPluginRPC, :server) do
-        [] ->
-          _ = Horde.DynamicSupervisor.start_child(pid, Astarte.VMQ.Plugin.RPC.Server)
+      with [] <- Horde.Registry.lookup(Registry.VMQPluginRPC, :server) do
+        _ = Horde.DynamicSupervisor.start_child(pid, Astarte.VMQ.Plugin.RPC.Server)
       end
 
       {:ok, pid}
