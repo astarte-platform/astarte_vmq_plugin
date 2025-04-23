@@ -1,7 +1,7 @@
 #
 # This file is part of Astarte.
 #
-# Copyright 2017 - 2025 SECO Mind Srl
+# Copyright 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,6 +16,6 @@
 # limitations under the License.
 #
 
-Mimic.copy(Astarte.VMQ.Plugin.Config)
-
-ExUnit.start(capture_log: true)
+defmodule Astarte.VMQ.Plugin.Test.Fixtures.Device do
+  def not_a_device_id, do: "I am not a device"
+end
