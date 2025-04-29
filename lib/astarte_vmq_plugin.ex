@@ -29,7 +29,7 @@ defmodule Astarte.VMQ.Plugin do
   alias Astarte.Core.Device
 
   @max_rand trunc(:math.pow(2, 32) - 1)
-  @vernemq_api Application.get_env(
+  @vernemq_api Application.compile_env(
                  :astarte_vmq_plugin,
                  :vernemq_api,
                  Astarte.VMQ.Plugin.VerneMQ.API
