@@ -94,7 +94,8 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
       {:dialyxir, "~> 1.4", only: [:dev, :ci], runtime: false},
       {:xandra, "~> 0.14"},
       {:astarte_generators, github: "astarte-platform/astarte_generators", only: [:dev, :test]},
-      {:mimic, "~> 1.10", only: :test}
+      {:mimic, "~> 1.10", only: :test},
+      {:mox, "~> 1.0", only: :test}
     ]
   end
 end

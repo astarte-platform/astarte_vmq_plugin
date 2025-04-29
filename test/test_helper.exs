@@ -17,5 +17,6 @@
 #
 
 Mimic.copy(Astarte.VMQ.Plugin.Config)
+Hammox.defmock(MockVerneMQ.API, for: Astarte.VMQ.Plugin.VerneMQ.API.Behaviour)
 
 ExUnit.start(capture_log: true)
