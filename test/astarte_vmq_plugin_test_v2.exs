@@ -583,6 +583,45 @@ defmodule Astarte.VMQ.Plugin.Test2 do
     end
   end
 
+  describe "ack device deletion" do
+    @describetag :integration
+    @describetag :amqp
+    @describetag :database
+
+    setup %{chan: chan, realm_name: realm_name} do
+      encoded_device_id = DeviceHelper.random_device()
+      Database.insert_device_into_deletion_in_progress!(realm_name, encoded_device_id)
+      setup_test_consumer!(chan, realm_name, encoded_device_id)
+      {:ok, %{device_id: encoded_device_id}}
+    end
+
+    @tag :ack_device_deletion
+    test "sends a goodbye message on AMQP and writes to the database", %{
+      realm_name: realm,
+      device_id: device_id
+    } do
+      Plugin.ack_device_deletion(realm, device_id)
+
+      assert_receive {:amqp_msg, "",
+                      %{headers: headers, timestamp: timestamp, message_id: message_id} =
+                        _metadata}
+
+      assert_in_delta timestamp, now_us_x10_timestamp(), @max_timestamp_difference
+
+      assert %{
+               "x_astarte_vmqamqp_proto_ver" => 1,
+               "x_astarte_msg_type" => "internal",
+               "x_astarte_internal_path" => "/f",
+               "x_astarte_realm" => ^realm,
+               "x_astarte_device_id" => ^device_id
+             } = amqp_headers_to_map(headers)
+
+      assert String.starts_with?(message_id, message_id_prefix(realm, device_id, timestamp))
+
+      assert Database.retrieve_device_vmq_ack!(realm, device_id) == true
+    end
+  end
+
   describe "disconnection and connection events are correctly serialized" do
     @describetag :integration
     @describetag :amqp

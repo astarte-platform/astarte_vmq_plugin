@@ -55,6 +55,12 @@ defmodule Astarte.VMQ.Plugin.Test.Helpers.Database do
       VALUES (:device_id, :vmq_ack);
   """
 
+  @select_device_vmq_ack """
+  SELECT vmq_ack
+    FROM :keyspace.deletion_in_progress
+    WHERE device_id = :device_id;
+  """
+
   @truncate_devices_table """
   TRUNCATE :keyspace.devices;
   """
@@ -88,6 +94,16 @@ defmodule Astarte.VMQ.Plugin.Test.Helpers.Database do
     params = %{"device_id" => {"uuid", device_id}, "vmq_ack" => {"boolean", false}}
 
     execute!(keyspace, @insert_device_into_deletion_in_progress, params)
+  end
+
+  def retrieve_device_vmq_ack!(realm, encoded_device_id) do
+    keyspace = keyspace_name!(realm)
+    {:ok, device_id} = Device.decode_device_id(encoded_device_id)
+    params = %{"device_id" => {"uuid", device_id}}
+
+    page = execute!(keyspace, @select_device_vmq_ack, params)
+    [%{"vmq_ack" => vmq_ack?}] = Enum.to_list(page)
+    vmq_ack?
   end
 
   def cleanup_db!(realm) do
