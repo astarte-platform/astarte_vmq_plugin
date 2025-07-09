@@ -32,7 +32,9 @@ defmodule Astarte.VMQ.Plugin.RPC.Server do
     name = {:via, Horde.Registry, {Registry.VMQPluginRPC, :server}}
     opts = Keyword.put(opts, :name, name)
 
-    GenServer.start_link(__MODULE__, args, opts)
+    with {:error, {:already_started, pid}} <- GenServer.start_link(__MODULE__, args, opts) do
+      {:ok, pid}
+    end
   end
 
   # Callbacks
@@ -126,7 +128,7 @@ defmodule Astarte.VMQ.Plugin.RPC.Server do
       ) do
     _ =
       Logger.warning(
-        "Received a :name_confict signal from the outer space, maybe a netsplit occurred? Gracefully shutting down.",
+        "Received a :name_conflict signal from the outer space, maybe a netsplit occurred? Gracefully shutting down.",
         tag: "RPC exit"
       )
 
