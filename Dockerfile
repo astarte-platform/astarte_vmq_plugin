@@ -1,4 +1,4 @@
-FROM hexpm/elixir:1.15.5-erlang-26.1-debian-bullseye-20230612-slim as builder
+FROM hexpm/elixir:1.15.5-erlang-26.1-debian-bullseye-20230612-slim AS builder
 
 # install build dependencies
 # --allow-releaseinfo-change allows to pull from 'oldstable'
@@ -24,7 +24,7 @@ RUN mix local.hex --force && \
   mix local.rebar --force && \
   mix hex.info
 
-ENV MIX_ENV prod
+ENV MIX_ENV=prod
 
 # Pass --build-arg BUILD_ENV=dev to build a dev image
 ARG BUILD_ENV=prod
@@ -57,10 +57,10 @@ COPY docker/bin/vernemq.sh /build/vernemq/_build/default/rel/vernemq/bin/
 RUN chmod +x /build/vernemq/_build/default/rel/vernemq/bin/vernemq.sh
 
 # Note: it is important to keep Debian versions in sync, or incompatibilities between libcrypto will happen
-FROM debian:bullseye-slim
+FROM debian:bullseye-slim@sha256:c2c58af6e3ceeb3ed40adba85d24cfa62b7432091597ada9b76b56a51b62f4c6
 
 # Set the locale
-ENV LANG C.UTF-8
+ENV LANG=C.UTF-8
 
 # We have to redefine this here since it goes out of scope for each build stage
 ARG BUILD_ENV=prod
@@ -75,28 +75,14 @@ COPY --from=builder /build/astarte_vmq_plugin/_build/$BUILD_ENV/rel/astarte_vmq_
 # Add the wait-for utility
 RUN cd /usr/bin && curl -O https://raw.githubusercontent.com/eficode/wait-for/master/wait-for && chmod +x wait-for && cd -
 
-# MQTT
-EXPOSE 1883
-
-# MQTT for Reverse Proxy
-EXPOSE 1885
-
-# MQTT/SSL
-EXPOSE 8883
-
-# VerneMQ Message Distribution
-EXPOSE 44053
-
-# EPMD - Erlang Port Mapper Daemon
-EXPOSE 4369
-
-# Specific Distributed Erlang Port Range
-EXPOSE 9100 9101 9102 9103 9104 9105 9106 9107 9108 9109
-
-# Prometheus Metrics
-EXPOSE 8888
-
-# Expose port for webroot ACME verification (in case)
-EXPOSE 80
+# 1883: MQTT
+# 1885: MQTT for Reverse Proxy
+# 8883: MQTT/SSL
+# 44053: VerneMQ Message Distribution
+# 4369: EPMD - Erlang Port Mapper Daemon
+# 9100 9101 9102 9103 9104 9105 9106 9107 9108 9109: Specific Distributed Erlang Port Range
+# 8888: Prometheus Metrics
+# 80: Webroot ACME verification (in case)
+EXPOSE 1883 1885 8883 44053 4369 9100 9101 9102 9103 9104 9105 9106 9107 9108 9109 8888 80
 
 CMD ["/opt/vernemq/bin/vernemq.sh"]
