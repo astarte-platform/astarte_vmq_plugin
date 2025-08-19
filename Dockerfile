@@ -66,7 +66,7 @@ ENV LANG C.UTF-8
 ARG BUILD_ENV=prod
 
 # We need SSL, curl, iproute2 and jq - and to ensure /etc/ssl/astarte
-RUN apt-get -qq update && apt-get -qq install libssl1.1 curl jq iproute2 netcat libsnappy1v5 && apt-get clean && mkdir -p /etc/ssl/astarte
+RUN apt-get -qq update && apt-get -qq install procps libssl1.1 curl jq iproute2 netcat libsnappy1v5 && apt-get clean && mkdir -p /etc/ssl/astarte
 
 # Copy our built stuff (both are self-contained with their ERTS release)
 COPY --from=builder /build/vernemq/_build/default/rel/vernemq /opt/vernemq/
