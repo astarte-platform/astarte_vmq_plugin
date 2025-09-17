@@ -182,22 +182,31 @@ defmodule Astarte.VMQ.Plugin.Config do
 
   def xandra_options! do
     # TODO handle SNI
+    keepalive =
+      case Application.get_env(:astarte_vmq_plugin, :cassandra_enable_keepalive, "true") do
+        "true" -> true
+        _ -> false
+      end
+
+    transport_options =
+      xandra_ssl_options()
+      |> Keyword.put(:keepalive, keepalive)
+
     [
       nodes: Application.get_env(:astarte_vmq_plugin, :cassandra_nodes),
       authentication: xandra_authentication_options(),
       pool_size: Application.get_env(:astarte_vmq_plugin, :cassandra_pool_size, 10),
       encryption: Application.get_env(:astarte_vmq_plugin, :cassandra_ssl_enabled, false),
+      transport_options: transport_options,
       name: :xandra
     ]
-    |> populate_xandra_ssl_options!()
   end
 
-  defp populate_xandra_ssl_options!(options) do
+  defp xandra_ssl_options do
     if Application.get_env(:astarte_vmq_plugin, :cassandra_ssl_enabled, false) do
-      ssl_options = build_xandra_ssl_options!()
-      Keyword.put(options, :transport_options, ssl_options)
+      build_xandra_ssl_options!()
     else
-      options
+      []
     end
   end
 
