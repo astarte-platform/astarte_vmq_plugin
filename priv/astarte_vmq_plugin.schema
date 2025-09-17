@@ -145,6 +145,11 @@
         {datatype, string}
   ]}.
 
+{mapping, "astarte_vmq_plugin.cassandra.enable_keepalive", "astarte_vmq_plugin.cassandra_enable_keepalive", [
+    {datatype, {enum, [true, false]}},
+    {default, true}
+  ]}.
+
 {translation, "astarte_vmq_plugin.registry_mfa",
   fun(Conf) ->
     S = cuttlefish:conf_get("astarte_vmq_plugin.registry_mfa", Conf),
