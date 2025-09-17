@@ -71,14 +71,12 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
 
   defp astarte_required_modules("true") do
     [
-      {:astarte_rpc, in_umbrella: true},
       {:astarte_core, in_umbrella: true}
     ]
   end
 
   defp astarte_required_modules(_) do
     [
-      {:astarte_rpc, "~> 1.2"},
       {:astarte_core, github: "astarte-platform/astarte_core", branch: "release-1.2"}
     ]
   end
@@ -93,6 +91,7 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
       {:horde, "~> 0.9"},
       {:dialyxir, "~> 1.4", only: [:dev, :ci], runtime: false},
       {:xandra, "~> 0.14"},
+      {:castore, "~> 1.0"},
       {:astarte_generators, github: "astarte-platform/astarte_generators", only: [:dev, :test]},
       {:mimic, "~> 1.10", only: :test},
       {:mox, "~> 1.0", only: :test}
