@@ -4,23 +4,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [1.3.0] - Unreleased
+## [1.3.0-rc.0] - 2025-11-21
 ### Added
 - Add the option to enable keepalive for scylladb connections, using the environment variable
   `DOCKER_VERNEMQ_ASTARTE_VMQ_PLUGIN__CASSANDRA__ENABLE_KEEPALIVE`. Defaults to `true`
+- Devices can now declare support for optional Astarte MQTT v1 features to Astarte via capabilities
 
-## [1.2.1-rc.0] 2025-08-22
+## [1.2.1-rc.0] - 2025-08-22
 ### Changed
 - RPC now uses erlang clustering instead of `astarte_rpc`
 
-## [1.2.1-alpha.0] 2025-04-10
+## [1.2.1-alpha.0] - 2025-04-10
 ### Added
 - Allow to set the Erlang cookie via the `RELEASE_COOKIE`
   env var. Default to `vmq` for backwards compatibility.
 
-## [1.2.0] 2024-07-01
+## [1.2.0] - 2024-07-01
 
-## [1.2.0-rc.0] 2024-05-29
+## [1.2.0-rc.0] - 2024-05-29
 ### Added
 - The plugin now accesses the Astarte database. The following
   env variables have been added:
