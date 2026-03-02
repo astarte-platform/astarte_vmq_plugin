@@ -1,7 +1,7 @@
 #
 # This file is part of Astarte.
 #
-# Copyright 2017 - 2023 SECO Mind Srl
+# Copyright 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,16 +16,15 @@
 # limitations under the License.
 #
 
-import Config
+defmodule Astarte.VMQ.Plugin.UtilsTest do
+  use ExUnit.Case, async: true
 
-config :astarte_vmq_plugin, :amqp_options, host: System.get_env("RABBITMQ_HOST") || "rabbitmq"
+  alias Astarte.VMQ.Plugin.Utils
 
-config :logger, :console,
-  format: {PrettyLog.UserFriendlyFormatter, :format},
-  metadata: [:function]
+  test "Returns functions with the same format as :vmq_reg.direct_plugin_exports" do
+    assert {fun_0, fun_3, {nil, nil}} = Utils.empty_plugin_functions()
 
-config :astarte_vmq_plugin, :queue_prefix, "test_data_queue_"
-
-config :astarte_vmq_plugin, :registry_mfa, {Astarte.VMQ.Plugin.MockVerne, :get_functions, []}
-
-config :astarte_vmq_plugin, :vernemq_api, MockVerneMQ.API
+    assert is_function(fun_0, 0)
+    assert is_function(fun_3, 3)
+  end
+end

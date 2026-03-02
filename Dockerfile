@@ -24,7 +24,7 @@ RUN mix local.hex --force && \
   mix local.rebar --force && \
   mix hex.info
 
-ENV MIX_ENV prod
+ENV MIX_ENV=prod
 
 # Pass --build-arg BUILD_ENV=dev to build a dev image
 ARG BUILD_ENV=prod
@@ -55,10 +55,10 @@ COPY docker/files/vernemq.conf vernemq/_build/default/rel/vernemq/etc/
 COPY docker/bin/rand_cluster_node.escript vernemq/_build/default/rel/vernemq/bin/
 
 # Note: it is important to keep Debian versions in sync, or incompatibilities between libcrypto will happen
-FROM --platform=${BUILDPLATFORM} debian:bullseye-slim
+FROM --platform=${BUILDPLATFORM} debian:bullseye-slim@sha256:c2c58af6e3ceeb3ed40adba85d24cfa62b7432091597ada9b76b56a51b62f4c6
 
 # Set the locale
-ENV LANG C.UTF-8
+ENV LANG=C.UTF-8
 
 # We have to redefine this here since it goes out of scope for each build stage
 ARG BUILD_ENV=prod
@@ -88,7 +88,9 @@ RUN ln -s /opt/vernemq/etc /etc/vernemq && \
 COPY --from=builder /build/astarte_vmq_plugin/_build/$BUILD_ENV/rel/astarte_vmq_plugin /opt/astarte_vmq_plugin/
 
 # Ports
+# 80  Webroot ACME verification (in case) 
 # 1883  MQTT
+# 1885  MQTT for Reverse Proxy
 # 8883  MQTT/SSL
 # 8080  MQTT WebSockets
 # 44053 VerneMQ Message Distribution
@@ -96,7 +98,7 @@ COPY --from=builder /build/astarte_vmq_plugin/_build/$BUILD_ENV/rel/astarte_vmq_
 # 8888  Health, API, Prometheus Metrics
 # 9100 9101 9102 9103 9104 9105 9106 9107 9108 9109  Specific Distributed Erlang Port Range
 
-EXPOSE 1883 8883 8080 44053 4369 8888 \
+EXPOSE 80 1883 1885 8883 8080 44053 4369 8888 \
        9100 9101 9102 9103 9104 9105 9106 9107 9108 9109
 
 VOLUME ["/opt/vernemq/log", "/opt/vernemq/data", "/opt/vernemq/etc"]

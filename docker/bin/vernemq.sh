@@ -103,6 +103,11 @@ if [ ! -s ${VERNEMQ_VM_ARGS_FILE} ]; then
   exit 1
 fi
 
+# Customize the Erlang cookie if specified
+if env | grep "RELEASE_COOKIE" -q; then
+    sed -i.bak -r "s/-setcookie vmq/-setcookie ${RELEASE_COOKIE}/" /opt/vernemq/etc/vm.args
+fi
+
 # Ensure the Erlang node name is set correctly
 if env | grep "DOCKER_VERNEMQ_NODENAME" -q; then
     sed -i.bak -r "s/-name VerneMQ@.+/-name VerneMQ@${DOCKER_VERNEMQ_NODENAME}/" ${VERNEMQ_VM_ARGS_FILE}

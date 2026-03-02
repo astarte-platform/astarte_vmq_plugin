@@ -28,6 +28,11 @@ defmodule Astarte.VMQ.Plugin do
   alias Astarte.Core.Device
 
   @max_rand trunc(:math.pow(2, 32) - 1)
+  @vernemq_api Application.compile_env(
+                 :astarte_vmq_plugin,
+                 :vernemq_api,
+                 Astarte.VMQ.Plugin.VerneMQ.API
+               )
 
   def auth_on_register(_peer, _subscriber_id, :undefined, _password, _cleansession) do
     # If it doesn't have a username we let someone else decide
@@ -95,7 +100,7 @@ defmodule Astarte.VMQ.Plugin do
     mountpoint = ~c""
     subscriber_id = {mountpoint, client_id}
 
-    case :vernemq_dev_api.disconnect_by_subscriber_id(subscriber_id, opts) do
+    case @vernemq_api.disconnect_by_subscriber_id(subscriber_id, opts) do
       :ok ->
         :ok
 

@@ -1,7 +1,7 @@
 #
 # This file is part of Astarte.
 #
-# Copyright 2017 Ispirata Srl
+# Copyright 2017 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,4 +16,7 @@
 # limitations under the License.
 #
 
-ExUnit.start()
+Mimic.copy(Astarte.VMQ.Plugin.Config)
+Mox.defmock(MockVerneMQ.API, for: Astarte.VMQ.Plugin.VerneMQ.API.Behaviour)
+
+ExUnit.start(capture_log: true)

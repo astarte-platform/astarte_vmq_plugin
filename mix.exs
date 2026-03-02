@@ -22,7 +22,7 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
   def project do
     [
       app: :astarte_vmq_plugin,
-      version: "1.2.0-dev",
+      version: "1.3.0-rc.1",
       elixir: "~> 1.15",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
@@ -71,15 +71,13 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
 
   defp astarte_required_modules("true") do
     [
-      {:astarte_rpc, in_umbrella: true},
       {:astarte_core, in_umbrella: true}
     ]
   end
 
   defp astarte_required_modules(_) do
     [
-      {:astarte_rpc, github: "astarte-platform/astarte_rpc"},
-      {:astarte_core, github: "astarte-platform/astarte_core"}
+      {:astarte_core, github: "astarte-platform/astarte_core", tag: "v1.3.0-rc.1", override: true}
     ]
   end
 
@@ -92,8 +90,13 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
       {:mississippi, github: "secomind/mississippi"},
       {:pretty_log, "~> 0.1"},
       {:flatlog, github: "annopaolo/flatlog"},
+      {:horde, "~> 0.9"},
       {:dialyxir, "~> 1.4", only: [:dev, :ci], runtime: false},
-      {:xandra, "~> 0.14"}
+      {:xandra, "~> 0.14"},
+      {:castore, "~> 1.0"},
+      {:astarte_generators, github: "astarte-platform/astarte_generators", only: [:dev, :test]},
+      {:mimic, "~> 1.10", only: :test},
+      {:mox, "~> 1.0", only: :test}
     ]
   end
 end

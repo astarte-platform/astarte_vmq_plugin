@@ -1,7 +1,7 @@
 #
 # This file is part of Astarte.
 #
-# Copyright 2017 - 2023 SECO Mind Srl
+# Copyright 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,16 +16,11 @@
 # limitations under the License.
 #
 
-import Config
+defmodule Astarte.VMQ.Plugin.Test.Helpers.Device do
+  alias Astarte.Core.Generators.Device, as: DeviceGenerator
 
-config :astarte_vmq_plugin, :amqp_options, host: System.get_env("RABBITMQ_HOST") || "rabbitmq"
-
-config :logger, :console,
-  format: {PrettyLog.UserFriendlyFormatter, :format},
-  metadata: [:function]
-
-config :astarte_vmq_plugin, :queue_prefix, "test_data_queue_"
-
-config :astarte_vmq_plugin, :registry_mfa, {Astarte.VMQ.Plugin.MockVerne, :get_functions, []}
-
-config :astarte_vmq_plugin, :vernemq_api, MockVerneMQ.API
+  def random_device() do
+    [device_id] = DeviceGenerator.encoded_id() |> Enum.take(1)
+    device_id
+  end
+end
