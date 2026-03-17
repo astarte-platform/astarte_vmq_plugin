@@ -22,5 +22,12 @@ defmodule Astarte.VMQ.Plugin.VerneMQ.API do
   @impl true
   def disconnect_by_subscriber_id(subscriber_id, opts) do
     :vernemq_dev_api.disconnect_by_subscriber_id(subscriber_id, opts)
+  catch
+    :exit, :normal -> :ok
+    :exit, {:normal, _} -> :ok
+    :exit, :shutdown -> :ok
+    :exit, {:shutdown, _} -> :ok
+    :exit, :noproc -> :ok
+    :exit, {:noproc, _} -> :ok
   end
 end
