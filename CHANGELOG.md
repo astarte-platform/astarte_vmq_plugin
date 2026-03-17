@@ -17,6 +17,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [1.2.1-rc.0] - 2025-08-22
 
+## [1.2.1] 2026-03-06
+
+## [1.2.1-rc.1] 2026-02-13
+
+### Added
+
+- Add the option to enable keepalive for scylladb connections, using the environment variable
+  `DOCKER_VERNEMQ_ASTARTE_VMQ_PLUGIN__CASSANDRA__ENABLE_KEEPALIVE`. Defaults to `true`
+
+## [1.2.1-rc.0] 2025-08-22
+
 ### Changed
 
 - RPC now uses erlang clustering instead of `astarte_rpc`
