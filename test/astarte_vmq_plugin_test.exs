@@ -128,6 +128,17 @@ defmodule Astarte.VMQ.PluginTest do
                  :dontcare
                )
     end
+
+    test "returns :next when username is :undefined" do
+      assert :next =
+               Plugin.auth_on_register(
+                 :dontcare,
+                 {"/", :dontcare},
+                 :undefined,
+                 :dontcare,
+                 :dontcare
+               )
+    end
   end
 
   test "partially authorized auth_on_subscribe for devices" do
@@ -830,6 +841,32 @@ defmodule Astarte.VMQ.PluginTest do
       after
         1_000 -> flunk("Expected connection message, did not receive any.")
       end
+    end
+  end
+
+  describe "ack_device_deletion" do
+    test "publishes an internal '/f' AMQP message and sets vmq_ack to true in the DB" do
+      DatabaseTestHelper.insert_device_into_devices!(@device_id)
+      DatabaseTestHelper.insert_device_into_deletion_in_progress!(@device_id)
+
+      assert :ok = Plugin.ack_device_deletion(@realm, @device_id)
+
+      assert_receive {:amqp_msg, "",
+                      %{headers: headers, timestamp: timestamp, message_id: _message_id} =
+                        _metadata}
+
+      # 5 seconds
+      assert_in_delta timestamp, now_us_x10_timestamp(), 50_000_000
+
+      assert %{
+               "x_astarte_vmqamqp_proto_ver" => 1,
+               "x_astarte_msg_type" => "internal",
+               "x_astarte_realm" => @realm,
+               "x_astarte_device_id" => @device_id,
+               "x_astarte_internal_path" => "/f"
+             } = amqp_headers_to_map(headers)
+
+      DatabaseTestHelper.cleanup_db!()
     end
   end
 
