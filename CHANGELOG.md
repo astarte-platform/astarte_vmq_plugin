@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.3.0-rc.2] - 2026-01-23
+
 ## [1.3.0-rc.1] - 2026-01-23
 
 ## [1.3.0-rc.0] - 2025-11-21
@@ -15,7 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   `DOCKER_VERNEMQ_ASTARTE_VMQ_PLUGIN__CASSANDRA__ENABLE_KEEPALIVE`. Defaults to `true`
 - Devices can now declare support for optional Astarte MQTT v1 features to Astarte via capabilities
 
-## [1.2.1-rc.0] - 2025-08-22
+## [1.2.2-rc.0] 2026-04-08
 
 ## [1.2.1] 2026-03-06
 
