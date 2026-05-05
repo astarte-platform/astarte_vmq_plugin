@@ -33,6 +33,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Add the option to enable keepalive for scylladb connections, using the environment variable
   `DOCKER_VERNEMQ_ASTARTE_VMQ_PLUGIN__CASSANDRA__ENABLE_KEEPALIVE`. Defaults to `true`
+### Fixed
+- Corner case in device deletion acknowledgment that could lead to deletion stalling permanently.
 
 ## [1.2.1-rc.0] 2025-08-22
 
