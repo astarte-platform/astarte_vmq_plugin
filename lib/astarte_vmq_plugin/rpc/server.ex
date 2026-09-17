@@ -23,7 +23,7 @@ defmodule Astarte.VMQ.Plugin.RPC.Server do
   alias Astarte.VMQ.Plugin.Publisher
   alias Astarte.VMQ.Plugin
 
-  use GenServer
+  use GenServer, restart: :permanent
   require Logger
 
   # Public API
@@ -32,7 +32,12 @@ defmodule Astarte.VMQ.Plugin.RPC.Server do
     name = {:via, Horde.Registry, {Registry.VMQPluginRPC, :server}}
     opts = Keyword.put(opts, :name, name)
 
-    GenServer.start_link(__MODULE__, args, opts)
+    with {:error, {:already_started, pid}} <- GenServer.start_link(__MODULE__, args, opts) do
+      "RPC server: already running: #{inspect(pid)}"
+      |> Logger.debug(tag: "rpc_started")
+
+      {:ok, pid}
+    end
   end
 
   # Callbacks
