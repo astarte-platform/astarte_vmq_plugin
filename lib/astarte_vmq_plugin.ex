@@ -270,7 +270,9 @@ defmodule Astarte.VMQ.Plugin do
       sharding_key: sharding_key
     ]
 
-    :ok = Mississippi.Producer.EventsProducer.publish(payload, publish_opts)
+    mississippi_config = Config.mississippi_config!()
+
+    :ok = Mississippi.Producer.EventsProducer.publish(payload, publish_opts, mississippi_config)
   end
 
   defp now_us_x10_timestamp do

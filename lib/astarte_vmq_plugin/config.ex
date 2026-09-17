@@ -156,13 +156,18 @@ defmodule Astarte.VMQ.Plugin.Config do
   def mississippi_opts! do
     [
       amqp_producer_options: amqp_options(),
-      mississippi_config: [
-        queues: [
-          events_exchange_name: "",
-          total_count: data_queue_count(),
-          prefix: data_queue_prefix()
-        ]
-      ]
+      mississippi_config: mississippi_config!()
+    ]
+  end
+
+  def mississippi_config! do
+    [
+      queues: [
+        events_exchange_name: "",
+        total_count: data_queue_count(),
+        prefix: data_queue_prefix()
+      ],
+      cluster_distribution_strategy: :uniform
     ]
   end
 
