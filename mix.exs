@@ -87,7 +87,7 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
       {:amqp, "~> 3.3"},
       {:vernemq_dev, github: "vernemq/vernemq_dev"},
       {:excoveralls, "~> 0.15", only: :test},
-      {:mississippi, github: "secomind/mississippi", branch: "release-1.0"},
+      {:mississippi, github: "noaccos/mississippi", branch: "push-umuxrstttvvz"},
       {:pretty_log, "~> 0.1"},
       {:flatlog, github: "annopaolo/flatlog"},
       # https://github.com/elixir-horde/horde/pull/291
