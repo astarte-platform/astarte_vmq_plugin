@@ -1,4 +1,4 @@
-FROM --platform=${BUILDPLATFORM} hexpm/elixir:1.15.5-erlang-26.1-debian-bullseye-20230612-slim AS builder
+FROM --platform=${BUILDPLATFORM} hexpm/elixir:1.15.5-erlang-26.1-debian-bookworm-20230612-slim AS builder
 
 # install build dependencies
 # --allow-releaseinfo-change allows to pull from 'oldstable'
@@ -54,7 +54,7 @@ COPY docker/files/vernemq.conf vernemq/_build/default/rel/vernemq/etc/
 COPY docker/bin/rand_cluster_node.escript vernemq/_build/default/rel/vernemq/bin/
 
 # Note: it is important to keep Debian versions in sync, or incompatibilities between libcrypto will happen
-FROM --platform=${BUILDPLATFORM} debian:bullseye-slim@sha256:c2c58af6e3ceeb3ed40adba85d24cfa62b7432091597ada9b76b56a51b62f4c6
+FROM --platform=${BUILDPLATFORM} debian:bookworm-20230612-slim
 
 # Set the locale
 ENV LANG=C.UTF-8
@@ -67,7 +67,7 @@ RUN apt-get -qq update && apt-get -qq install bash procps openssl iproute2 curl 
 
 # We need SSL, curl, iproute2 and jq - and to ensure /etc/ssl/astarte
 # TODO some of these might not be needed anymore
-RUN apt-get -qq update && apt-get -qq install libssl1.1 curl jq iproute2 netcat && apt-get clean && mkdir -p /etc/ssl/astarte
+RUN apt-get -qq update && apt-get -qq install curl jq iproute2 ncat && apt-get clean && mkdir -p /etc/ssl/astarte
 
 ENV PATH="/opt/vernemq/bin:$PATH"
 
