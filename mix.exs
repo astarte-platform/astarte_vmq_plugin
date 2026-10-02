@@ -93,7 +93,7 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
       # https://github.com/elixir-horde/horde/pull/291
       {:horde, github: "noaccOS/horde", branch: "push-ozyqtonylvpv"},
       {:dialyxir, "~> 1.4", only: [:dev, :ci], runtime: false},
-      {:xandra, "~> 0.14"},
+      {:xandra, "~> 0.19.4"},
       {:castore, "~> 1.0"},
       {:astarte_generators, github: "astarte-platform/astarte_generators", only: [:dev, :test]},
       {:mimic, "~> 1.10", only: :test},
