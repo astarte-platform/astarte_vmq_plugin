@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+### Fixed
+
+- Reconnect to Cassandra/ScyllaDB after the database restarts. The plugin could get
+  permanently stuck with no usable connection.
+
 ## [1.4.0-rc.4] - 2026-08-06
 
 ### Fixed
