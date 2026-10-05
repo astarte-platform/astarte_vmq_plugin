@@ -37,6 +37,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Update VerneMQ to 2.0.1
 - Use mississippi as AMQP publisher
 
+## [1.3.5] - 2026-10-05
+
+### Fixed
+
+- Increase RPC server reliability. A new corner case has been fixed which would've resulted in the
+  rpc server not being available
+
 ## [1.3.4] - 2026-09-17
 
 ### Fixed
