@@ -169,4 +169,8 @@
     {default, ""},
     {datatype, string}
   ]}.
-  
+
+{mapping, "astarte_vmq_plugin.inject_custom_routes", "astarte_vmq_plugin.inject_custom_routes", [
+  {default, true},
+  {datatype, {enum, [true, false]}}
+]}.  
