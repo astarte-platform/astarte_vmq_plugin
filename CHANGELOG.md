@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+### Added
+
+- Expose a new /healtz endpoint to check whether the AMQP connection toward RabbitMQ instance
+  is ok and all the expected EventsProducer workers are running.
+
+## [1.4.0-rc.6] - 2026-09-28
+
+### Changed
+
+- Shard AMQP producers
+- Increase RPC server reliability
+
+## [1.4.0-rc.5] - 2026-08-19
+
 ## [1.4.0-rc.4] - 2026-08-06
 
 ### Fixed
@@ -29,6 +43,22 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Update VerneMQ to 2.0.1
 - Use mississippi as AMQP publisher
+
+## [1.3.5] - 2026-10-05
+
+### Fixed
+
+- Increase RPC server reliability. A new corner case has been fixed which would've resulted in the
+  rpc server not being available
+
+## [1.3.4] - 2026-09-17
+
+### Fixed
+
+- Ensure the RPC server is always available to clients. Previously, a temporary disconnection
+  and reconnection of VerneMQ to the cluster would make the RPC server inaccessible.
+
+## [1.3.3] - 2026-08-07
 
 ## [1.3.2] - 2026-07-14
 

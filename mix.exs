@@ -95,12 +95,16 @@ defmodule Astarte.VMQ.Plugin.Mixfile do
       {:dialyxir, "~> 1.4", only: [:dev, :ci, :test], runtime: false},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
-      {:xandra, "~> 0.14"},
+      {:xandra, "~> 0.19.4"},
       {:castore, "~> 1.0"},
       {:decimal, "~> 3.0", override: true},
       {:astarte_generators, github: "astarte-platform/astarte_generators", only: [:dev, :test]},
       {:mimic, "~> 1.10", only: :test},
-      {:mox, "~> 1.0", only: :test}
+      {:mox, "~> 1.0", only: :test},
+      # cowboy/ranch are provided by the underlying VerneMQ host when in production env
+      {:cowboy, "~> 2.12.0"},
+      {:ranch, "~> 2.1.0", override: true},
+      {:httpoison, "~> 2.2", override: true, only: :test}
     ]
   end
 end

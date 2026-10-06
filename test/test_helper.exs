@@ -18,5 +18,7 @@
 
 Mimic.copy(Astarte.VMQ.Plugin.Config)
 Mimic.copy(:vernemq_dev_api)
+Mox.defmock(MockVerneMQ.API, for: Astarte.VMQ.Plugin.VerneMQ.API.Behaviour)
+Mimic.copy(Mississippi.Producer.Healthcheck)
 
 ExUnit.start(capture_log: true)

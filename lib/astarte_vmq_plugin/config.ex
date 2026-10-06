@@ -84,6 +84,17 @@ defmodule Astarte.VMQ.Plugin.Config do
       end
 
     Application.put_env(:astarte_rpc, :amqp_connection, astarte_rpc_amqp_opts)
+
+    # Check if we want to inject custom HTTP endpoints in the Verne cowboy listener
+    inject_custom_routes =
+      Application.get_env(:astarte_vmq_plugin, :inject_custom_routes, "false")
+      |> to_string()
+      |> case do
+        "true" -> true
+        _ -> false
+      end
+
+    Application.put_env(:astarte_vmq_plugin, :inject_custom_routes, inject_custom_routes)
   end
 
   defp init_ssl_options(amqp_options) do
@@ -161,7 +172,8 @@ defmodule Astarte.VMQ.Plugin.Config do
           events_exchange_name: "",
           total_count: data_queue_count(),
           prefix: data_queue_prefix()
-        ]
+        ],
+        cluster_distribution_strategy: :uniform
       ]
     ]
   end
