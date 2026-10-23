@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Expose a new /healtz endpoint to check whether the AMQP connection toward RabbitMQ instance
   is ok and all the expected EventsProducer workers are running.
 
+### Changed
+
+- The message producer workers now run on the local node only, guaranteeing per-device message
+  ordering with lower latency.
+
 ## [1.4.0-rc.6] - 2026-09-28
 
 ### Changed
