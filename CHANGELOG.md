@@ -49,6 +49,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Update VerneMQ to 2.0.1
 - Use mississippi as AMQP publisher
 
+## [1.3.6] - 2026-10-28
+
+### Fixed
+
+- Properly handle AMQP credentials with underscores. Do not replace duble underscores in env values,
+  replace it in env variable name only
+
 ## [1.3.5] - 2026-10-05
 
 ### Fixed
